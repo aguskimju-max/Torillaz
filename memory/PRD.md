@@ -61,11 +61,29 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Rute terdaftar di App.js: /produksi/bom, /produksi/order, /penjualan, /penjualan/piutang.
 - Tested: frontend flows 100% PASSED (iteration_2.json), no bugs.
 
+## Implemented (2026-07-31) — Phase 7 (Keuangan Sederhana) + Export Laporan
+- **Keuangan (finance_router.py)**: Kas & Bank ledger (finance_transactions), saldo rekening
+  otomatis (saldo_awal + masuk - keluar). Endpoints: /finance/summary, /finance/rekening,
+  /finance/transactions (list/create/delete manual), /finance/laba-rugi.
+- **Kas & Bank page** (KasBankPage): KPI total saldo + pemasukan/pengeluaran bulan ini, kartu
+  saldo per rekening, catat Kas Masuk/Kas Keluar (kategori biaya operasional dari master),
+  filter tab & rekening, hapus transaksi manual (transaksi otomatis tidak bisa dihapus).
+- **Laba/Rugi page** (LabaRugiPage): laporan otomatis Pendapatan (penjualan) - HPP = Laba Kotor,
+  dikurangi Beban Operasional (per kategori dari kas keluar) = Laba Bersih. Filter rentang tanggal,
+  Export PDF (labaRugiPDF).
+- **SSOT**: pembayaran penjualan (kirim tunai / bayar) dengan rekening otomatis membuat kas masuk
+  kategori "Penjualan" (ref_type=penjualan, is_beban=false).
+- **Export Excel/PDF** (lib/export.js xlsx + jspdf-autotable, komponen ExportButtons): tombol Export
+  pada daftar Penjualan, Produksi, dan Kartu Stok (dropdown Excel/PDF, fetch semua data terfilter).
+- Rute: /keuangan/kas-bank, /keuangan/laba-rugi. RBAC modul "keuangan".
+- Tested: iteration_3.json 100% PASSED (backend curl + frontend). 1 bug diperbaiki (import
+  ExportButtons di KartuStokPage).
+
 ## Backlog (prioritized)
 ### P0 (next phases per user roadmap)
 - Fase 4 Pembelian: PR → PO → Penerimaan → Invoice supplier → Pembayaran, hutang, retur.
 ### P1
-- Fase 7 Keuangan: kas/bank masuk-keluar, arus kas, laba rugi, piutang/hutang aging.
+- Fase 7 Keuangan (LANJUTAN): arus kas (cash flow), piutang/hutang aging, transfer antar rekening.
 - Fase 8 HR & Payroll: absensi, lembur, kasbon, payroll otomatis, slip gaji.
 - Fase 9 Laporan & KPI lengkap: export Excel/PDF, drill-down, filter multi-dimensi.
 ### P2
