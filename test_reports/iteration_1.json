@@ -1,0 +1,42 @@
+{
+  "summary": "First full test iteration for ERP Manajemen Usaha Terpadu (Phase 1-3). Executed 23 pytest cases covering Auth, Dashboard, Master CRUD, Stock single-source-of-truth (penerimaan/pengeluaran/penyesuaian/transfer/opname/negative-stock guard/kartu), Notifications, RBAC (warehouse role), Users/Roles, Audit, Backup — all 23 PASSED. Frontend Playwright walk-through with admin: login OK, dashboard KPI+charts render (Nilai Persediaan Rp 14.062.000, jumlah_gudang=2, low stock badges), sidebar shows grouped modules, Master Supplier add via drawer works (toast 'Data berhasil disimpan', new SUP-0007 appears), Stok list, Penerimaan form, Pengguna page all render correctly. All expected data-testid attributes are present (master-add-btn, field-nama, drawer-submit, stock-item-type, stock-item, stock-gudang, stock-qty, stock-submit, notification bell).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force lockout is per replica-pod: identifier uses request.client.host which reflects the ingress/proxy pod IP (10.81.23.5 / 10.81.23.6). Behind 2 backend replicas, counts split, so lockout after 5 attempts is actually ~5 per pod (~9-10 total). Recommend keying on email only, or read client IP from X-Forwarded-For."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Stok/Penerimaan form (Expired Date field)", "issues": ["Uses browser-default HTML date input (mm/dd/yyyy) instead of a shadcn Calendar/DatePicker. Consider replacing for consistency and Indonesian locale (dd/mm/yyyy)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix brute-force lockout identifier to not fragment across backend replicas (use email-only key or trust proxy for real client IP).",
+    "Optional: Replace native <input type=date> with a shadcn Calendar/DatePicker (Indonesian format) on stock operation forms."
+  ],
+  "critical_code_review_comments": [
+    "security.py: brute-force identifier `f'{ip}:{email}'` breaks under multi-replica ingress since request.client.host = proxy pod IP. Fragmentation means real MAX_ATTEMPTS is per-pod, not global.",
+    "stock_router.py: apply_delta and record_movement mutate two collections (stock_balances + stock_movements) without a Mongo transaction; a crash between them will desync ledger vs balance. Consider a session with a multi-document transaction or write movement first with saldo_akhir recomputed from balance.",
+    "dashboard_router.py + misc_router.py: iterate every stock balance and issue individual find_one for each item; N+1 pattern. Fine at current scale but should batch with $lookup or in-memory map when volumes grow.",
+    "auth_router.py /refresh: sets access cookie manually instead of calling set_auth_cookies helper (works but violates DRY).",
+    "master_router.py: `q` search only matches nama/kode; other identifying fields (email, telepon, NIK) not searchable.",
+    "seed.py `seed_admin` re-hashes password only when different, but never de-locks a locked account or clears login_attempts on password reset."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (23/23)", "frontend": "100% of covered flows"},
+  "test_credentials": "Admin: aguskimju@gmail.com / Admin@12345 (super_admin). Warehouse test user is created and cleaned up per-test.",
+  "seed_data_creation": "Created TEST_UI_Supplier_Z via UI (still present in master_supplier after test); pytest test_crud_supplier creates+soft-deletes TEST_Supplier_* rows; test_warehouse_login creates+deletes a test_wh_*@test.com user. Also several TEST batch stock movements (BATCH-TEST / BATCH-WH / BATCH-OPN) exist on Tepung Terigu and Gula Pasir - non-destructive additions.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Re-run `pytest /app/backend/tests/backend_test.py` for regression. All 23 tests idempotent (use random UUIDs). If backend lockout logic is fixed, tighten test_brute_force_lockout back to expect 429 within 6 attempts. Frontend Kartu Stok page /stok/kartu wasn't deep-tested (needs item selection state); auto-refresh of dashboard/notifications after stock movement not verified in-browser but backend endpoints return updated data (confirmed via API).",
+  "rca of the issue": "Brute-force lockout partial failure RCA: The app runs behind Kubernetes ingress with 2 backend pods. security.py:check_lockout/register_failed key attempts by `f'{ip}:{email}'` where ip = request.client.host. In this env request.client.host is the proxy/pod IP, and requests round-robin between two pods so counts are split into TWO different identifiers (e.g. 10.81.23.5:foo@x.com=3 and 10.81.23.6:foo@x.com=3). Neither reaches MAX_ATTEMPTS=5 in the first 6 attempts, so the intended '429 after 5 fails' contract is broken. Mitigation: key by email only, or trust X-Forwarded-For (via Starlette ProxyHeadersMiddleware / uvicorn --proxy-headers) and use the real client IP."
+}

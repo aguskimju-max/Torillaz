@@ -1,0 +1,69 @@
+import {
+  LayoutDashboard, Database, Warehouse, Settings, ScrollText,
+  Building2, MapPin, Boxes, Grid3x3, Tags, Ruler, Bookmark, Truck, Users,
+  Wheat, Package, UserSquare2, Briefcase, Network, Landmark, Percent, CreditCard,
+  Receipt, PackagePlus, PackageMinus, SlidersHorizontal, ArrowLeftRight, ClipboardCheck,
+  BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup,
+} from "lucide-react";
+
+export const NAV = [
+  {
+    label: null,
+    items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard, module: "dashboard" }],
+  },
+  {
+    label: "Master Data",
+    icon: Database,
+    module: "master",
+    items: [
+      { to: "/master/perusahaan", label: "Perusahaan", icon: Building2, module: "master" },
+      { to: "/master/cabang", label: "Cabang", icon: MapPin, module: "master" },
+      { to: "/master/gudang", label: "Gudang", icon: Warehouse, module: "master" },
+      { to: "/master/rak", label: "Rak / Lokasi", icon: Grid3x3, module: "master" },
+      { to: "/master/kategori", label: "Kategori", icon: Tags, module: "master" },
+      { to: "/master/satuan", label: "Satuan", icon: Ruler, module: "master" },
+      { to: "/master/merek", label: "Merek", icon: Bookmark, module: "master" },
+      { to: "/master/supplier", label: "Supplier", icon: Truck, module: "master" },
+      { to: "/master/pelanggan", label: "Pelanggan", icon: Users, module: "master" },
+      { to: "/master/bahan_baku", label: "Bahan Baku", icon: Wheat, module: "master" },
+      { to: "/master/barang_jadi", label: "Barang Jadi", icon: Package, module: "master" },
+      { to: "/master/karyawan", label: "Karyawan", icon: UserSquare2, module: "master" },
+      { to: "/master/jabatan", label: "Jabatan", icon: Briefcase, module: "master" },
+      { to: "/master/divisi", label: "Divisi", icon: Network, module: "master" },
+      { to: "/master/rekening", label: "Rekening Kas/Bank", icon: Landmark, module: "master" },
+      { to: "/master/pajak", label: "Pajak", icon: Percent, module: "master" },
+      { to: "/master/metode_pembayaran", label: "Metode Pembayaran", icon: CreditCard, module: "master" },
+      { to: "/master/biaya", label: "Biaya Operasional", icon: Receipt, module: "master" },
+    ],
+  },
+  {
+    label: "Gudang & Stok",
+    icon: Warehouse,
+    module: "gudang",
+    items: [
+      { to: "/stok", label: "Stok Saat Ini", icon: Boxes, module: "gudang" },
+      { to: "/stok/penerimaan", label: "Penerimaan", icon: PackagePlus, module: "gudang" },
+      { to: "/stok/pengeluaran", label: "Pengeluaran", icon: PackageMinus, module: "gudang" },
+      { to: "/stok/penyesuaian", label: "Penyesuaian", icon: SlidersHorizontal, module: "gudang" },
+      { to: "/stok/transfer", label: "Transfer Gudang", icon: ArrowLeftRight, module: "gudang" },
+      { to: "/stok/opname", label: "Stock Opname", icon: ClipboardCheck, module: "gudang" },
+      { to: "/stok/kartu", label: "Kartu Stok", icon: BookOpen, module: "gudang" },
+    ],
+  },
+  {
+    label: "Pengaturan",
+    icon: Settings,
+    module: "pengaturan",
+    items: [
+      { to: "/pengaturan/pengguna", label: "Pengguna", icon: UserCog, module: "pengaturan" },
+      { to: "/pengaturan/role", label: "Role & Hak Akses", icon: ShieldCheck, module: "pengaturan" },
+      { to: "/pengaturan/backup", label: "Backup Data", icon: DatabaseBackup, module: "pengaturan" },
+    ],
+  },
+  {
+    label: "Audit",
+    icon: ScrollText,
+    module: "audit",
+    items: [{ to: "/audit", label: "Audit Trail", icon: ListChecks, module: "audit" }],
+  },
+];
