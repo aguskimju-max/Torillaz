@@ -86,6 +86,23 @@ async def _recap(karyawan_id, periode):
     return r
 
 
+@router.get("/attendance/recap")
+async def attendance_recap(periode: str, user=Depends(require("hr", "view"))):
+    jab = await _jabatan_map()
+    rows = []
+    async for kar in db.master_karyawan.find({"deleted_at": None, "is_active": True}).sort("nama", 1):
+        kid = str(kar["_id"])
+        r = await _recap(kid, periode)
+        rows.append({
+            "karyawan_id": kid, "karyawan_nama": kar.get("nama"),
+            "jabatan_nama": jab.get(str(kar.get("jabatan_id"))) or "-",
+            "hadir": r["hadir"], "izin": r["izin"], "sakit": r["sakit"],
+            "alpha": r["alpha"], "libur": r["libur"], "jam_lembur": r["jam_lembur"],
+            "tercatat": r["hadir"] + r["izin"] + r["sakit"] + r["alpha"] + r["libur"],
+        })
+    return {"periode": periode, "items": rows}
+
+
 # ---------------- KASBON ----------------
 @router.get("/kasbon")
 async def list_kasbon(status: Optional[str] = None, karyawan_id: Optional[str] = None,

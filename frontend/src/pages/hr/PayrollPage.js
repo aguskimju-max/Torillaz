@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users, Wallet, Clock, Cog, Eye, HandCoins, Trash2, FileText } from "lucide-react";
+import { Users, Wallet, Clock, Cog, Eye, HandCoins, Trash2, FileText, CalendarCheck } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -33,6 +33,7 @@ export default function PayrollPage() {
   const [toDelete, setToDelete] = useState(null);
 
   const { data, isLoading } = useQuery({ queryKey: ["payroll", periode], queryFn: async () => (await api.get("/hr/payroll", { params: { periode, limit: 200 } })).data });
+  const { data: recap } = useQuery({ queryKey: ["att-recap", periode], queryFn: async () => (await api.get("/hr/attendance/recap", { params: { periode } })).data });
   const { data: summary } = useQuery({ queryKey: ["hr-summary"], queryFn: async () => (await api.get("/hr/summary")).data });
   const { data: rekList } = useQuery({ queryKey: ["fin-rekening"], queryFn: async () => (await api.get("/finance/rekening")).data });
   const { data: perusahaan } = useQuery({ queryKey: ["perusahaan-list"], queryFn: async () => (await api.get("/master/perusahaan", { params: { limit: 1 } })).data });
@@ -93,6 +94,37 @@ export default function PayrollPage() {
         <div><Label className="mb-1.5 block">BPJS %</Label><Input data-testid="payroll-bpjs" type="number" value={cfg.bpjs_persen} onChange={(e) => setCfg((p) => ({ ...p, bpjs_persen: e.target.value }))} className="w-24" /></div>
         <div><Label className="mb-1.5 block">Pajak %</Label><Input data-testid="payroll-pajak" type="number" value={cfg.pajak_persen} onChange={(e) => setCfg((p) => ({ ...p, pajak_persen: e.target.value }))} className="w-24" /></div>
         {hasPerm("hr", "add") && <Button data-testid="payroll-generate" className="bg-emerald-600 hover:bg-emerald-700" disabled={genMut.isPending} onClick={() => genMut.mutate()}><Cog className="h-4 w-4 mr-1.5" /> Generate Payroll</Button>}
+      </div>
+
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden mb-5" data-testid="payroll-recap">
+        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+          <CalendarCheck className="h-4 w-4 text-emerald-600" />
+          <span className="font-heading font-semibold text-slate-800 text-sm">Rekap Absensi · {periode}</span>
+          <span className="text-xs text-slate-400 ml-auto">Cek sebelum generate payroll</span>
+        </div>
+        <table className="w-full text-sm">
+          <thead className="text-xs uppercase tracking-wider text-slate-400">
+            <tr>
+              <th className="text-left px-4 py-2">Karyawan</th>
+              <th className="px-3 py-2">Hadir</th><th className="px-3 py-2">Izin</th><th className="px-3 py-2">Sakit</th>
+              <th className="px-3 py-2">Alpha</th><th className="px-3 py-2">Libur</th><th className="px-3 py-2">Lembur (jam)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(recap?.items || []).map((r) => (
+              <tr key={r.karyawan_id} className="border-t border-slate-100 text-center">
+                <td className="text-left px-4 py-2"><div className="font-medium text-slate-800">{r.karyawan_nama}</div><div className="text-xs text-slate-400">{r.jabatan_nama}</div></td>
+                <td className="px-3 py-2 text-emerald-700 font-medium">{r.hadir}</td>
+                <td className="px-3 py-2">{r.izin}</td>
+                <td className="px-3 py-2">{r.sakit}</td>
+                <td className="px-3 py-2 text-rose-600 font-medium">{r.alpha}</td>
+                <td className="px-3 py-2 text-slate-400">{r.libur}</td>
+                <td className="px-3 py-2">{angka(r.jam_lembur)}</td>
+              </tr>
+            ))}
+            {(!recap?.items || recap.items.length === 0) && <tr><td colSpan={7} className="px-4 py-6 text-center text-slate-400">Belum ada data absensi pada periode ini</td></tr>}
+          </tbody>
+        </table>
       </div>
 
       <DataTable testId="payroll-table" columns={columns} rows={data?.items || []} loading={isLoading} total={data?.total || 0} emptyText="Belum ada payroll untuk periode ini. Klik Generate Payroll." />

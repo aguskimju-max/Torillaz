@@ -145,3 +145,52 @@ async def delete_role(name: str, user=Depends(require("pengaturan", "delete"))):
     await db.roles.delete_one({"name": name})
     await log_audit(user, "delete", "pengaturan", "role", name, f"Hapus role: {name}")
     return {"ok": True}
+
+
+# ---------------- RESET / HAPUS DATA DUMMY ----------------
+RESET_TARGETS = {
+    "stok": {"label": "Stok & Pergerakan", "collections": ["stock_movements", "stock_balances"]},
+    "produksi": {"label": "Produksi & Resep (BOM)", "collections": ["production_orders", "boms"]},
+    "penjualan": {"label": "Penjualan & Piutang", "collections": ["sales_orders", "customer_payments"]},
+    "keuangan": {"label": "Kas & Bank", "collections": ["finance_transactions"]},
+    "hr": {"label": "HR (Absensi, Kasbon, Payroll)", "collections": ["hr_attendance", "hr_kasbon", "hr_payroll"]},
+    "master_produk": {"label": "Master Produk (Bahan Baku & Barang Jadi)", "collections": ["master_bahan_baku", "master_barang_jadi"]},
+    "master_relasi": {"label": "Master Supplier & Pelanggan", "collections": ["master_supplier", "master_pelanggan"]},
+    "master_karyawan": {"label": "Master Karyawan", "collections": ["master_karyawan"]},
+    "master_pendukung": {"label": "Master Pendukung (Kategori, Satuan, Jabatan, Divisi, Pajak, Rekening, Biaya)",
+                         "collections": ["master_kategori", "master_satuan", "master_jabatan", "master_divisi",
+                                         "master_pajak", "master_rekening", "master_biaya"]},
+}
+
+
+@router.get("/reset/summary")
+async def reset_summary(user=Depends(require("pengaturan", "delete"))):
+    out = []
+    for key, cfg in RESET_TARGETS.items():
+        count = 0
+        for coll in cfg["collections"]:
+            count += await db[coll].count_documents({})
+        out.append({"key": key, "label": cfg["label"], "count": count})
+    return {"targets": out}
+
+
+@router.post("/reset")
+async def reset_data(payload: dict = Body(...), user=Depends(require("pengaturan", "delete"))):
+    targets = payload.get("targets") or []
+    full = "all" in targets
+    if full:
+        targets = list(RESET_TARGETS.keys())
+    deleted = {}
+    for key in targets:
+        cfg = RESET_TARGETS.get(key)
+        if not cfg:
+            continue
+        for coll in cfg["collections"]:
+            res = await db[coll].delete_many({})
+            deleted[coll] = res.deleted_count
+    # only reset code counters on a full wipe to avoid code collisions with kept data
+    if full:
+        await db.counters.delete_many({})
+    await log_audit(user, "delete", "pengaturan", "reset_data", ",".join(targets),
+                    f"Reset data dummy: {targets}")
+    return {"ok": True, "deleted": deleted, "targets": targets}

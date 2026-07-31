@@ -3,7 +3,7 @@ import {
   Building2, MapPin, Boxes, Grid3x3, Tags, Ruler, Bookmark, Truck, Users,
   Wheat, Package, UserSquare2, Briefcase, Network, Landmark, Percent, CreditCard,
   Receipt, PackagePlus, PackageMinus, SlidersHorizontal, ArrowLeftRight, ClipboardCheck,
-  BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup,
+  BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup, Eraser,
   Factory, ChefHat, ShoppingCart, HandCoins,
   Wallet, Coins, LineChart, CalendarCheck, FileBarChart,
 } from "lucide-react";
@@ -104,6 +104,7 @@ export const NAV = [
       { to: "/pengaturan/pengguna", label: "Pengguna", icon: UserCog, module: "pengaturan" },
       { to: "/pengaturan/role", label: "Role & Hak Akses", icon: ShieldCheck, module: "pengaturan" },
       { to: "/pengaturan/backup", label: "Backup Data", icon: DatabaseBackup, module: "pengaturan" },
+      { to: "/pengaturan/reset", label: "Reset / Hapus Data", icon: Eraser, module: "pengaturan" },
     ],
   },
   {

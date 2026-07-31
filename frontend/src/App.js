@@ -14,6 +14,7 @@ import KartuStokPage from "@/pages/stock/KartuStokPage";
 import UsersPage from "@/pages/settings/UsersPage";
 import RolesPage from "@/pages/settings/RolesPage";
 import BackupPage from "@/pages/settings/BackupPage";
+import ResetDataPage from "@/pages/settings/ResetDataPage";
 import AuditPage from "@/pages/AuditPage";
 import BomPage from "@/pages/produksi/BomPage";
 import ProductionPage from "@/pages/produksi/ProductionPage";
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="/pengaturan/pengguna" element={<Guard module="pengaturan"><UsersPage /></Guard>} />
             <Route path="/pengaturan/role" element={<Guard module="pengaturan"><RolesPage /></Guard>} />
             <Route path="/pengaturan/backup" element={<Guard module="pengaturan"><BackupPage /></Guard>} />
+            <Route path="/pengaturan/reset" element={<Guard module="pengaturan"><ResetDataPage /></Guard>} />
             <Route path="/audit" element={<Guard module="audit"><AuditPage /></Guard>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
