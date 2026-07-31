@@ -89,6 +89,14 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 ### P2
 - Barcode/QR scan kamera, import Excel, multi-level approval, forecasting stok/penjualan, notifikasi email/WA, restore backup, DB transactions untuk ledger.
 
+## Deployment (2026-07-31)
+- Menambah endpoint `GET /health` (level app, tanpa prefix /api) di server.py untuk probe
+  liveness/readiness Kubernetes — root cause deploy gagal (probe 404).
+- Optimasi dashboard_router.py: hilangkan N+1 (batch-load master items ke dict), ganti query
+  per-hari (movement & sales chart) jadi single ranged query + bucketing memori, tambah projection
+  pada recent movements. Penting untuk MongoDB Atlas (tiap query = round-trip jaringan).
+- Deployment checks: compilation/env/CORS/mongo semua OK.
+
 ## Next Tasks
 - Mulai Fase 4 (Pembelian) yang terhubung ke stok penerimaan & hutang supplier.
 - Lanjut Fase 7 (Keuangan sederhana).

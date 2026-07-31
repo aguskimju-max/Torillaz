@@ -25,6 +25,12 @@ logger = logging.getLogger("erp")
 
 app = FastAPI(title="ERP Manajemen Usaha Terpadu")
 
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
+
 health = APIRouter(prefix="/api")
 
 
