@@ -84,10 +84,22 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Fase 4 Pembelian: PR → PO → Penerimaan → Invoice supplier → Pembayaran, hutang, retur.
 ### P1
 - Fase 7 Keuangan (LANJUTAN): arus kas (cash flow), piutang/hutang aging, transfer antar rekening.
-- Fase 8 HR & Payroll: absensi, lembur, kasbon, payroll otomatis, slip gaji.
 - Fase 9 Laporan & KPI lengkap: export Excel/PDF, drill-down, filter multi-dimensi.
 ### P2
 - Barcode/QR scan kamera, import Excel, multi-level approval, forecasting stok/penjualan, notifikasi email/WA, restore backup, DB transactions untuk ledger.
+
+## Implemented (2026-07-31) — Phase 8 (HR & Payroll) + Phase 9 (Dashboard & Laporan)
+- **HR backend (hr_router.py)**: absensi harian (upsert per karyawan+tanggal), kasbon (ajukan/bayar/potong
+  otomatis saat payroll), payroll generate otomatis (gaji pokok + tunjangan + lembur − alpha − BPJS% − pajak% −
+  kasbon), bayar payroll → kas keluar "Gaji Karyawan" (beban) + kasbon lunas, /hr/summary.
+- **HR frontend**: AbsensiPage (grid harian), KasbonPage, PayrollPage (generate + detail + slip PDF + bayar).
+- **Slip Gaji PDF** (slipGajiPDF) berlogo.
+- **Dashboard Fase 9**: KPI penjualan/keuangan (omzet hari/bulan, laba kotor, piutang, total produksi),
+  grafik Tren Omzet 7 hari (LineChart), daftar Produk Terlaris.
+- **Halaman Laporan** (/laporan): tab Penjualan, Laba/Rugi, Persediaan, Produksi, Payroll — filter tanggal +
+  Export Excel/PDF (ExportButtons) di tiap tab.
+- Nav group baru: HR & Payroll (Data Karyawan/Absensi/Kasbon/Penggajian) + Laporan. Modul RBAC hr & laporan.
+- Tested: backend curl end-to-end PASS; frontend iteration_4.json 100% PASS, no bugs.
 
 ## Deployment (2026-07-31)
 - Menambah endpoint `GET /health` (level app, tanpa prefix /api) di server.py untuk probe
