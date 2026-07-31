@@ -1,0 +1,125 @@
+{
+  "theme": "light",
+  "archetype": "Organic & Earthy / High-Contrast Hybrid (Food Manufacturing ERP)",
+  "typography": {
+    "strategy": "Professional Utility - Clean hierarchy for dense data environments.",
+    "fonts": {
+      "headings": "Work Sans",
+      "body": "IBM Plex Sans",
+      "mono": "JetBrains Mono"
+    },
+    "scale": {
+      "h1": "text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900",
+      "h2": "text-2xl sm:text-3xl font-medium tracking-tight text-slate-800",
+      "h3": "text-xl font-medium text-slate-800",
+      "h4": "text-lg font-medium text-slate-800",
+      "body": "text-sm text-slate-600 leading-relaxed",
+      "small": "text-xs text-slate-500 uppercase tracking-widest font-semibold",
+      "data_table": "text-sm text-slate-700"
+    },
+    "installation": "yarn add @fontsource/work-sans @fontsource/ibm-plex-sans @fontsource/jetbrains-mono"
+  },
+  "colors": {
+    "background": {
+      "app": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "sidebar": "#0F172A"
+    },
+    "primary": {
+      "DEFAULT": "#059669",
+      "hover": "#047857",
+      "light": "#D1FAE5",
+      "text": "#FFFFFF"
+    },
+    "status": {
+      "success": { "bg": "#DCFCE7", "text": "#15803D", "border": "#86EFAC" },
+      "warning": { "bg": "#FEF3C7", "text": "#B45309", "border": "#FDE047", "usage": "low stock, pending payments" },
+      "danger": { "bg": "#FEE2E2", "text": "#B91C1C", "border": "#FCA5A5", "usage": "expired batch, negative stock, unpaid debts" },
+      "info": { "bg": "#E0F2FE", "text": "#0369A1", "border": "#7DD3FC" }
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "muted": "#94A3B8",
+      "sidebar": "#94A3B8",
+      "sidebar_active": "#FFFFFF"
+    },
+    "border": "#E2E8F0"
+  },
+  "grids_and_layouts": {
+    "strategy": "High Density Grid (For Dashboards/Analytics)",
+    "container": "w-full min-h-screen flex bg-slate-50",
+    "sidebar": {
+      "width": "w-64",
+      "style": "bg-slate-900 border-r border-slate-800 flex-shrink-0 fixed h-full z-40 transition-all duration-300",
+      "item": "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white"
+    },
+    "main_content": "flex-1 ml-64 p-6 lg:p-8 min-h-screen w-[calc(100%-16rem)]",
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+    "kpi_card": "col-span-1 bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-2 hover:-translate-y-0.5 transition-transform"
+  },
+  "components": {
+    "strategy": "Flat, Crisp, High-Contrast Data UI. Avoid heavy shadows. Use 1px borders.",
+    "buttons": {
+      "primary": "bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-md font-medium transition-colors text-sm shadow-sm",
+      "secondary": "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 px-4 py-2 rounded-md font-medium transition-colors text-sm shadow-sm",
+      "danger": "bg-rose-600 text-white hover:bg-rose-700 px-4 py-2 rounded-md font-medium transition-colors text-sm shadow-sm"
+    },
+    "cards": "bg-white rounded-lg border border-slate-200 shadow-[0_1px_2px_rgba(0,0,0,0.05)]",
+    "tables": {
+      "wrapper": "w-full overflow-auto bg-white rounded-lg border border-slate-200 shadow-sm",
+      "header": "bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200 py-3 px-4 text-left sticky top-0",
+      "row": "border-b border-slate-100 hover:bg-slate-50 transition-colors group cursor-pointer",
+      "cell": "py-3 px-4 text-sm text-slate-700 align-middle whitespace-nowrap"
+    },
+    "forms": {
+      "input": "flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all",
+      "label": "block text-sm font-medium text-slate-700 mb-1.5",
+      "layout": "For complex ERP data entry (e.g., BOM, Master Data), use Side Drawers (Slide-overs) instead of center modals to maximize vertical space."
+    },
+    "badges": "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border"
+  },
+  "visual_enhancers": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5, slightly muted colors unless active.",
+      "usage": "Use icons heavily in sidebar, KPI cards, and table actions to improve visual parsing speed."
+    },
+    "micro_interactions": {
+      "table_rows": "Subtle bg-slate-50 on hover to track wide rows easily.",
+      "buttons": "Active state: scale-95 transition-transform.",
+      "notifications": "Bell icon with a pulsing red absolute dot if unread alerts exist (e.g., stock minimum reached)."
+    }
+  },
+  "images": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1652211955967-99c892925469?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBmb29kJTIwbWFudWZhY3R1cmluZyUyMGZhY2lsaXR5fGVufDB8fHx8MTc4NTUwMDI2N3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Modern food manufacturing facility. Use as a half-screen background on the login page with a dark/green gradient overlay (bg-emerald-900/60)."
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure all text passes WCAG AA. Never use grey text on a grey background for data.",
+    "testing": "All interactive elements (buttons, inputs, menu items, table rows) MUST have a `data-testid` attribute using kebab-case role-based naming (e.g., `data-testid='sidebar-gudang-link'`).",
+    "focus": "All focusable elements must have visible focus rings (`focus:ring-2 focus:ring-emerald-500/20`)."
+  },
+  "instructions_to_main_agent": [
+    "Build a custom HTML/Tailwind layout for the Sidebar and Dashboard framing. Avoid wrapping the entire app in generic Shadcn containers.",
+    "Use standard `.js` files for React components (not `.tsx`).",
+    "Use Shadcn components for complex interactive logic: Dialog/Drawer for CRUD, Select/Combobox for Autocomplete, DropdownMenu for table row actions, Sonner for Toast notifications.",
+    "Data Tables are critical: Implement search inputs above tables, distinct column headers, and pagination controls at the bottom.",
+    "The app requires a Single Source of Truth feeling: no fragmented UI. Keep spacing tight (px-4 py-3) in tables to view maximum data without scrolling.",
+    "Use the specific color status semantics for stock levels (danger for expired, warning for low stock).",
+    "For the login page, create a split-screen design. Left side: Login form on white background. Right side: The login_background image with a dark overlay.",
+    "Do NOT use complete transparent backgrounds in headers or dropdowns. Ensure solid backgrounds (bg-white) for all floating elements to avoid overlap collision."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not use generic centered layouts or simplistic purple gradients. This is a professional business tool.",
+    "Create depth through 1px borders and subtle shadow-sm, not massive drop shadows.",
+    "Use glass-morphism (backdrop-blur) only for sticky headers or modals over complex content, otherwise stick to solid white.",
+    "DO NOT apply `transition: all` globally. Apply specific transitions like `transition-colors` or `transition-transform`.",
+    "DO NOT center align the main app container. Text and data must flow naturally from the left.",
+    "Always use modern pill-shaped or slightly rounded buttons (rounded-md) with clear interaction states.",
+    "NEVER use emojis as icons. Use lucide-react.",
+    "Ensure Sonner toasts are implemented in a root layout for global notifications."
+  ]
+}
