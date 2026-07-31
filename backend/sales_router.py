@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from db import db, oid, now_iso, get_next_code, serialize, log_audit
 from rbac import require
 from stock_router import get_item, gudang_name, available_qty, consume_stock_fifo
+from finance_router import post_cash_txn
 
 router = APIRouter(prefix="/api/sales", tags=["sales"])
 
@@ -114,6 +115,10 @@ async def _record_payment(so, jumlah, rekening_id, metode, tanggal, user):
          "$push": {"pembayaran": payment}})
     await db.customer_payments.insert_one({**payment, "so_id": str(so["_id"]), "no_so": so["no_so"],
                                            "pelanggan_nama": so.get("pelanggan_nama")})
+    if rekening_id:
+        await post_cash_txn(rekening_id, "masuk", jumlah, "Penjualan",
+                            f"Pembayaran {so['no_so']} - {so.get('pelanggan_nama')}",
+                            tanggal, user, ref_type="penjualan", ref_id=so["no_so"])
     return terbayar, max(sisa, 0), status
 
 

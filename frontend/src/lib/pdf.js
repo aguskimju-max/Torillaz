@@ -181,3 +181,33 @@ export function suratJalanPDF(so, company, customer) {
   footerNote(doc, "Mohon periksa barang sebelum menandatangani surat jalan ini.");
   doc.save(`SuratJalan-${so.no_surat_jalan || so.no_so}.pdf`);
 }
+
+export function labaRugiPDF(report, company, periodLabel) {
+  const doc = new jsPDF();
+  const y = drawHeader(doc, company, "LABA / RUGI", periodLabel);
+  const body = [];
+  body.push([{ content: "PENDAPATAN", styles: { fontStyle: "bold", textColor: GREY } }, ""]);
+  body.push(["   Penjualan", rupiah(report.pendapatan)]);
+  body.push(["   Harga Pokok Penjualan (HPP)", `(${rupiah(report.hpp)})`]);
+  body.push([{ content: "Laba Kotor", styles: { fontStyle: "bold" } }, { content: rupiah(report.laba_kotor), styles: { fontStyle: "bold" } }]);
+  body.push([{ content: "BEBAN OPERASIONAL", styles: { fontStyle: "bold", textColor: GREY } }, ""]);
+  if ((report.beban || []).length === 0) body.push(["   (tidak ada beban)", rupiah(0)]);
+  (report.beban || []).forEach((b) => body.push([`   ${b.kategori}`, `(${rupiah(b.jumlah)})`]));
+  body.push([{ content: "Total Beban", styles: { fontStyle: "bold" } }, { content: `(${rupiah(report.total_beban)})`, styles: { fontStyle: "bold" } }]);
+  autoTable(doc, {
+    startY: y, body, theme: "plain",
+    styles: { fontSize: 10, textColor: SLATE, cellPadding: 1.8 },
+    columnStyles: { 1: { halign: "right" } },
+    margin: { left: 14, right: 14 },
+  });
+  let fy = doc.lastAutoTable.finalY + 4;
+  doc.setDrawColor(...EMERALD);
+  doc.setLineWidth(0.6);
+  doc.line(14, fy, 196, fy);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(...EMERALD);
+  doc.text("LABA BERSIH", 14, fy + 8);
+  doc.text(rupiah(report.laba_bersih), 196, fy + 8, { align: "right" });
+  doc.save(`LabaRugi-${report.start}_${report.end}.pdf`);
+}

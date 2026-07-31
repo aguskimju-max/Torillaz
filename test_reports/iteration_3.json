@@ -1,0 +1,33 @@
+{
+  "summary": "Full E2E test of Fase 7 (Keuangan Sederhana + Export Excel/PDF). Backend finance API verified via curl. Frontend: Kas & Bank page fully functional (KPI, per-rekening saldo cards, Kas Masuk & Kas Keluar dialog, filter tab Semua/Masuk/Keluar, filter rekening, delete manual txn dengan konfirmasi, no delete button on auto txn). Laba/Rugi page render, date range Terapkan refresh, Export PDF downloaded. SSOT integration validated: created SO-0004 tunai (Roti Coklat 2x8000, rekening Kas Utama), Kirim -> INV-0003/SJ-0003, auto kas masuk KAS-0004 kategori 'Penjualan' (ref_type=penjualan, is_beban=false, badge 'otomatis' + tanpa tombol hapus di UI), saldo Kas Utama naik dari 9.987.655 -> 10.003.655, PEMASUKAN BULAN INI 0 -> 16.000, LR pendapatan 480.000 -> 496.000. Export buttons: Penjualan (Penjualan.xlsx + Penjualan.pdf), Produksi (Produksi.xlsx + Produksi.pdf), Kartu Stok (KartuStok-Coklat Bubuk.xlsx + .pdf) semua terunduh tanpa error setelah fix import ExportButtons di KartuStokPage.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "KartuStokPage", "issue": "ReferenceError: ExportButtons is not defined - komponen dipakai tanpa di-import sehingga /stok/kartu crash (Uncaught runtime error overlay). Tombol kartu-export-btn tidak pernah render.", "selector": "/app/frontend/src/pages/stock/KartuStokPage.js", "priority": "HIGH (FIXED oleh testing agent - menambahkan import ExportButtons dari @/components/common/ExportButtons)"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Kas dialog & LabaRugi dialog", "issues": ["Radix DialogContent tanpa Description / aria-describedby (warning console, bukan blocker)"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py"],
+  "action_items": [
+    "(Sudah difix oleh testing) Tambahkan import ExportButtons di KartuStokPage.js.",
+    "Pertimbangkan menambahkan DialogDescription pada Kas Masuk/Kas Keluar dialog agar warning aksesibilitas hilang.",
+    "Saat SO Kirim gagal (mis. stok kurang) di UI, pastikan toast/pesan error tetap ditampilkan (saat tes stok Kue Kering Premium 0, klik Kirim tampak silent dari sisi state — endpoint mengembalikan 400 'Stok tidak cukup'; verifikasi toast muncul di aplikasi produksi user)."
+  ],
+  "critical_code_review_comments": [
+    "finance_router.post_cash_txn: silent skip jika rekening_id kosong. Untuk transparansi, log ketika penjualan tunai dibuat tanpa rekening bisa membantu debugging.",
+    "finance_router.laba_rugi: menggunakan subtotal (belum pajak) sebagai pendapatan dan is_beban default True untuk semua kas keluar (kecuali eksplisit False). Pastikan mutasi keluar antar-rekening di masa depan menandai is_beban=False agar tidak mengurangi laba.",
+    "KartuStokPage: tidak ada guard import ExportButtons — proses build/lint tidak menangkap ReferenceError. Rekomendasi: tambahkan eslint-plugin-react/jsx-no-undef atau CI check untuk mencegah bug serupa di halaman lain.",
+    "Sales SO kirim endpoint mengembalikan 400 dengan 'Stok tidak cukup', pastikan UI menampilkan toast error (belum diverifikasi visual saat test)."
+  ],
+  "updated_files": ["/app/frontend/src/pages/stock/KartuStokPage.js"],
+  "success_rate": {"backend": "100%", "frontend": "100% (setelah fix KartuStokPage)"},
+  "test_credentials": "aguskimju@gmail.com / Admin@12345 (super_admin)",
+  "seed_data_creation": "Tambahan seed: KAS-0001 (Bank BCA -75.000 Listrik & Air), KAS-0002 (Kas Utama -12.345 Gaji Karyawan TEST), KAS-0003 (Kas Utama masuk manual - dihapus di test), KAS-0004 (Kas Utama +16.000 auto Penjualan SO-0004). SO-0003 (draft, Kue Kering Premium 1, rekening Kas Utama, TIDAK bisa dikirim karena stok 0). SO-0004 (Lunas, Roti Coklat 2 x 8000, INV-0003/SJ-0003).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SO-0003 masih draft dengan stok kurang untuk Kue Kering Premium (stok=0). SO-0004 sudah lunas. Kartu Stok pilihan awal item_type='Bahan Baku', item_id perlu dipilih dari dropdown 'kartu-item' (mis. 'Coklat Bubuk (BB-0004)') sebelum kartu-export-btn menjadi enabled. Semua data-testid dari sales/prod/kartu export dropdown mengikuti pattern {testId}-btn -> {testId}-excel/{testId}-pdf.",
+  "rca of the issue": "Bug KartuStokPage.js: komponen ExportButtons dipakai di baris 61 tanpa import statement. Saat React render page, ReferenceError menyebabkan seluruh komponen unmount dan menampilkan overlay 'Uncaught runtime errors'. Root cause: developer lupa menambahkan import saat menambahkan tombol export. Fix: tambahkan `import ExportButtons from '@/components/common/ExportButtons';` di bagian import KartuStokPage.js. Verified post-fix: kartu-export-btn tampil, disabled sebelum item dipilih, aktif setelah pilih item, dan Excel/PDF terunduh dengan filename KartuStok-{namaItem}.{ext}."
+}

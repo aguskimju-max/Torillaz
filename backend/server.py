@@ -15,6 +15,7 @@ from stock_router import router as stock_router
 from dashboard_router import router as dashboard_router
 from production_router import router as production_router
 from sales_router import router as sales_router
+from finance_router import router as finance_router
 from misc_router import router as misc_router
 from settings_router import router as settings_router
 
@@ -39,6 +40,7 @@ app.include_router(stock_router)
 app.include_router(dashboard_router)
 app.include_router(production_router)
 app.include_router(sales_router)
+app.include_router(finance_router)
 app.include_router(misc_router)
 app.include_router(settings_router)
 

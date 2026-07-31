@@ -5,6 +5,7 @@ import {
   Receipt, PackagePlus, PackageMinus, SlidersHorizontal, ArrowLeftRight, ClipboardCheck,
   BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup,
   Factory, ChefHat, ShoppingCart, HandCoins,
+  Wallet, Coins, LineChart,
 } from "lucide-react";
 
 export const NAV = [
@@ -67,6 +68,15 @@ export const NAV = [
     items: [
       { to: "/penjualan", label: "Transaksi Penjualan", icon: ShoppingCart, module: "penjualan" },
       { to: "/penjualan/piutang", label: "Piutang", icon: HandCoins, module: "penjualan" },
+    ],
+  },
+  {
+    label: "Keuangan",
+    icon: Wallet,
+    module: "keuangan",
+    items: [
+      { to: "/keuangan/kas-bank", label: "Kas & Bank", icon: Coins, module: "keuangan" },
+      { to: "/keuangan/laba-rugi", label: "Laba / Rugi", icon: LineChart, module: "keuangan" },
     ],
   },
   {

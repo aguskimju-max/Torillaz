@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import api from "@/lib/api";
 import PageHeader from "@/components/common/PageHeader";
 import DataTable from "@/components/common/DataTable";
+import ExportButtons from "@/components/common/ExportButtons";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { angka, tanggalWaktu } from "@/lib/format";
@@ -43,9 +44,23 @@ export default function KartuStokPage() {
     { key: "keterangan", label: "Keterangan" },
   ];
 
+  const kartuExportColumns = [
+    { label: "Waktu", value: (r) => tanggalWaktu(r.created_at), width: 20 },
+    { label: "No. Transaksi", value: (r) => r.no_transaksi || "", width: 16 },
+    { label: "Tipe", value: (r) => TIPE_LABEL[r.tipe] || r.tipe, width: 16 },
+    { label: "Gudang", value: (r) => r.gudang_nama || "", width: 18 },
+    { label: "Batch", value: (r) => r.batch || "", width: 12 },
+    { label: "Masuk", value: (r) => (r.qty > 0 ? r.qty : ""), align: "right", width: 12 },
+    { label: "Keluar", value: (r) => (r.qty < 0 ? Math.abs(r.qty) : ""), align: "right", width: 12 },
+    { label: "Saldo", value: (r) => r.saldo, align: "right", width: 12 },
+    { label: "Keterangan", value: (r) => r.keterangan || "", width: 30 },
+  ];
+
   return (
     <div>
-      <PageHeader title="Kartu Stok" subtitle="Riwayat lengkap pergerakan stok per item dengan saldo berjalan" />
+      <PageHeader title="Kartu Stok" subtitle="Riwayat lengkap pergerakan stok per item dengan saldo berjalan">
+        <ExportButtons testId="kartu-export" filename={`KartuStok-${data?.item?.nama || "item"}`} title="Kartu Stok" subtitle={data?.item?.nama} columns={kartuExportColumns} rows={data?.movements || []} orientation="landscape" disabled={!itemId || !(data?.movements || []).length} />
+      </PageHeader>
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
         <div>
           <Label className="mb-1.5 block">Jenis Item</Label>

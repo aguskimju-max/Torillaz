@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import PageHeader from "@/components/common/PageHeader";
 import DataTable from "@/components/common/DataTable";
 import StatusBadge from "@/components/common/StatusBadge";
+import ExportButtons from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -138,6 +139,19 @@ export default function SalesPage() {
     else suratJalanPDF(so, company, cust);
   };
 
+  const salesExportColumns = [
+    { label: "No. SO", value: (r) => r.no_so, width: 14 },
+    { label: "Tanggal", value: (r) => tanggal(r.tanggal), width: 14 },
+    { label: "Pelanggan", value: (r) => r.pelanggan_nama || "", width: 24 },
+    { label: "Tipe", value: (r) => r.tipe, width: 10 },
+    { label: "No. Invoice", value: (r) => r.no_invoice || "", width: 14 },
+    { label: "Total", value: (r) => r.total, align: "right", width: 16 },
+    { label: "Terbayar", value: (r) => r.terbayar, align: "right", width: 16 },
+    { label: "Sisa", value: (r) => r.sisa, align: "right", width: 16 },
+    { label: "Status", value: (r) => r.status, width: 12 },
+  ];
+  const fetchAllSales = async () => (await api.get("/sales/orders", { params: { q, status, page: 1, limit: 2000 } })).data.items;
+
   const columns = [
     { key: "no_so", label: "No. SO", render: (r) => <span className="font-mono text-xs font-medium text-slate-800">{r.no_so}</span> },
     { key: "tanggal", label: "Tanggal", render: (r) => tanggal(r.tanggal) },
@@ -165,6 +179,7 @@ export default function SalesPage() {
   return (
     <div>
       <PageHeader title="Transaksi Penjualan" subtitle="Sales Order → Surat Jalan → Invoice → Pembayaran, dengan cetak dokumen">
+        <ExportButtons testId="sales-export" filename="Penjualan" title="Laporan Penjualan" subtitle={`Filter status: ${status}`} columns={salesExportColumns} rows={fetchAllSales} orientation="landscape" />
         {hasPerm("penjualan", "add") && (
           <Button data-testid="sales-add-btn" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setOpen(true)}>
             <ShoppingCart className="h-4 w-4 mr-1.5" /> Buat Penjualan

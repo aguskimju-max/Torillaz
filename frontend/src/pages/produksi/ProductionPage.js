@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import PageHeader from "@/components/common/PageHeader";
 import DataTable from "@/components/common/DataTable";
 import StatusBadge from "@/components/common/StatusBadge";
+import ExportButtons from "@/components/common/ExportButtons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,6 +96,18 @@ export default function ProductionPage() {
     processMut.mutate();
   };
 
+  const prodExportColumns = [
+    { label: "No. Produksi", value: (r) => r.no_produksi, width: 14 },
+    { label: "Tanggal", value: (r) => tanggal(r.tanggal), width: 14 },
+    { label: "Produk", value: (r) => r.barang_jadi_nama || "", width: 24 },
+    { label: "Target", value: (r) => r.qty_target, align: "right", width: 12 },
+    { label: "Hasil", value: (r) => r.qty_hasil, align: "right", width: 12 },
+    { label: "HPP/Unit", value: (r) => r.hpp_per_unit, align: "right", width: 16 },
+    { label: "Total HPP", value: (r) => r.total_hpp, align: "right", width: 16 },
+    { label: "Capaian %", value: (r) => r.achievement, align: "right", width: 12 },
+  ];
+  const fetchAllProd = async () => (await api.get("/production/orders", { params: { q, page: 1, limit: 2000 } })).data.items;
+
   const columns = [
     { key: "no_produksi", label: "No. Produksi", render: (r) => <span className="font-mono text-xs font-medium text-slate-800">{r.no_produksi}</span> },
     { key: "tanggal", label: "Tanggal", render: (r) => tanggal(r.tanggal) },
@@ -111,6 +124,7 @@ export default function ProductionPage() {
   return (
     <div>
       <PageHeader title="Produksi & HPP" subtitle="Jalankan produksi dari resep, hitung kebutuhan bahan & HPP otomatis">
+        <ExportButtons testId="prod-export" filename="Produksi" title="Laporan Produksi & HPP" columns={prodExportColumns} rows={fetchAllProd} orientation="landscape" />
         {hasPerm("produksi", "add") && (
           <Button data-testid="prod-add-btn" className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setOpen(true)}>
             <Factory className="h-4 w-4 mr-1.5" /> Proses Produksi
