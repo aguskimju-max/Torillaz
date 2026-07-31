@@ -15,6 +15,10 @@ import UsersPage from "@/pages/settings/UsersPage";
 import RolesPage from "@/pages/settings/RolesPage";
 import BackupPage from "@/pages/settings/BackupPage";
 import AuditPage from "@/pages/AuditPage";
+import BomPage from "@/pages/produksi/BomPage";
+import ProductionPage from "@/pages/produksi/ProductionPage";
+import SalesPage from "@/pages/penjualan/SalesPage";
+import PiutangPage from "@/pages/penjualan/PiutangPage";
 
 function FullLoader() {
   return (
@@ -68,6 +72,10 @@ export default function App() {
             <Route path="/stok/transfer" element={<Guard module="gudang"><StockOperationPage mode="transfer" /></Guard>} />
             <Route path="/stok/opname" element={<Guard module="gudang"><StockOperationPage mode="opname" /></Guard>} />
             <Route path="/stok/kartu" element={<Guard module="gudang"><KartuStokPage /></Guard>} />
+            <Route path="/produksi/bom" element={<Guard module="produksi"><BomPage /></Guard>} />
+            <Route path="/produksi/order" element={<Guard module="produksi"><ProductionPage /></Guard>} />
+            <Route path="/penjualan" element={<Guard module="penjualan"><SalesPage /></Guard>} />
+            <Route path="/penjualan/piutang" element={<Guard module="penjualan"><PiutangPage /></Guard>} />
             <Route path="/pengaturan/pengguna" element={<Guard module="pengaturan"><UsersPage /></Guard>} />
             <Route path="/pengaturan/role" element={<Guard module="pengaturan"><RolesPage /></Guard>} />
             <Route path="/pengaturan/backup" element={<Guard module="pengaturan"><BackupPage /></Guard>} />

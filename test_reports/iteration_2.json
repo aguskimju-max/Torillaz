@@ -1,0 +1,26 @@
+{
+  "summary": "Full frontend wiring test of Fase 5 (Produksi & HPP) and Fase 6 (Penjualan + Piutang). Login OK, all three pages render, entire flows work end-to-end with no JS/page errors. Preview kebutuhan bahan + HPP muncul otomatis, Proses Produksi menghasilkan PRD-0002 dengan HPP/unit terhitung, detail produksi menampilkan bahan terpakai. Sales Order SO-0002 dibuat sebagai Draft, klik Kirim → status Lunas (tunai), no_invoice=INV-0002 & no_surat_jalan=SJ-0002 terisi. Ketiga tombol cetak Invoice/Nota/Surat Jalan memicu download PDF (Invoice-INV-0002.pdf, Nota-SO-0002.pdf, SuratJalan-SJ-0002.pdf). Bayar sebagian pada SO-0001 (kredit) berhasil. Halaman Piutang menampilkan KPI Total Piutang & Jatuh Tempo, list tagihan belum lunas, aksi Bayar berfungsi (toast sukses). Filter tab Semua/Draft/Dikirim/Sebagian/Lunas dapat diklik dan mengubah tampilan tabel.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "ProductionPage.js: preview auto-fetch di useEffect belum di-debounce; setiap perubahan qty_target men-trigger POST /production/preview. Untuk qty besar/user cepat ini bisa spam request. Rekomendasi: tambahkan debounce 300-500ms.",
+    "SalesPage.js kirimMut mengirim payload {rekening_id: undefined} yang setara body kosong; jika suatu saat backend butuh rekening untuk kas masuk tunai, sebaiknya UI memaksa pilih rekening ketika tipe=tunai. Saat ini tunai bisa dikirim tanpa rekening.",
+    "PiutangPage.js: status badge selalu 'Belum Lunas' meskipun order sudah dibayar sebagian; untuk konsistensi dengan tab SalesPage sebaiknya membedakan 'Sebagian' vs 'Belum Dibayar'.",
+    "Tabs filter menggunakan Radix TabsTrigger tanpa exposing atribut value ke DOM – testing agent selanjutnya sebaiknya pakai selector by-text (has_text) atau tambahkan data-testid per tab.",
+    "Preview effect di ProductionPage tidak memvalidasi respon jika BOM diganti saat request masih berjalan (race sudah ditangani via active flag – OK)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "100%"},
+  "test_credentials": "aguskimju@gmail.com / Admin@12345 (super_admin)",
+  "seed_data_creation": "Selama test terbentuk PRD-0002 (Roti Coklat, 5 pcs, HPP/unit Rp 5.425) dan SO-0002 (tunai, Distributor Snack Jaya, Kue Kering Premium 2×40.000 = Rp 80.000, status Lunas, INV-0002/SJ-0002). SO-0001 dibayar tambahan Rp 1.000 dari halaman Sales dan Rp 1.000 dari halaman Piutang (total tambahan Rp 2.000, sisa akhir sekitar Rp 242.000).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Data seed sudah bertambah: PRD-0002, SO-0002 (Lunas), SO-0001 masih Sebagian. Pelanggan tunggal (Distributor Snack Jaya). Produk yg dipilih untuk penjualan test adalah 'Kue Kering Premium' bukan 'Roti Coklat'. Semua data-testid sesuai spesifikasi bekerja. Tabs Radix tidak expose attribute [value=...] – gunakan text selector.",
+  "rca of the issue": "Tidak ada bug ditemukan."
+}
