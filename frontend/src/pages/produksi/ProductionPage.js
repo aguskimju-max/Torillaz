@@ -42,11 +42,11 @@ export default function ProductionPage() {
   const boms = bomData?.items || [];
   const selectedBom = boms.find((b) => b.id === form.bom_id);
 
-  // auto preview when bom + qty + gudang bb chosen
+  // auto preview when bom + qty + gudang bb chosen (debounced)
   useEffect(() => {
     let active = true;
-    const run = async () => {
-      if (!form.bom_id || !form.gudang_bb_id || !(Number(form.qty_target) > 0)) { setPreview(null); return; }
+    if (!form.bom_id || !form.gudang_bb_id || !(Number(form.qty_target) > 0)) { setPreview(null); return; }
+    const t = setTimeout(async () => {
       try {
         const res = (await api.post("/production/preview", {
           bom_id: form.bom_id, qty_target: Number(form.qty_target), gudang_bb_id: form.gudang_bb_id,
@@ -56,9 +56,8 @@ export default function ProductionPage() {
           setForm((p) => ({ ...p, biaya_tk: String(res.biaya_tk), biaya_overhead: String(res.biaya_overhead) }));
         }
       } catch { if (active) setPreview(null); }
-    };
-    run();
-    return () => { active = false; };
+    }, 400);
+    return () => { active = false; clearTimeout(t); };
   }, [form.bom_id, form.qty_target, form.gudang_bb_id]);
 
   useEffect(() => { if (!open) { setForm(EMPTY); setPreview(null); } }, [open]);

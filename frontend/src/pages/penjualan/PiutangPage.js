@@ -49,7 +49,9 @@ export default function PiutangPage() {
     { key: "total", label: "Total", align: "right", render: (r) => rupiah(r.total) },
     { key: "terbayar", label: "Terbayar", align: "right", render: (r) => rupiah(r.terbayar) },
     { key: "sisa", label: "Sisa", align: "right", render: (r) => <span className="text-rose-600 font-semibold">{rupiah(r.sisa)}</span> },
-    { key: "status", label: "Status", render: (r) => r.overdue ? <StatusBadge variant="danger">Jatuh Tempo</StatusBadge> : <StatusBadge variant="warning">Belum Lunas</StatusBadge> },
+    { key: "status", label: "Status", render: (r) => r.overdue
+      ? <StatusBadge variant="danger">Jatuh Tempo</StatusBadge>
+      : (r.terbayar > 0 ? <StatusBadge variant="warning">Sebagian</StatusBadge> : <StatusBadge variant="info">Belum Dibayar</StatusBadge>) },
     { key: "_aksi", label: "Aksi", align: "right", render: (r) => (
       hasPerm("penjualan", "add") ? (
         <Button variant="outline" size="sm" data-testid={`piutang-bayar-${r.id}`} onClick={() => { setBayar(r); setForm({ jumlah: String(r.sisa), rekening_id: "none", metode: "Transfer" }); }}>

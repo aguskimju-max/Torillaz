@@ -45,11 +45,25 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Sample data manufaktur makanan + saldo stok awal ter-seed otomatis.
 - Tested: 23/23 backend pytest PASSED; frontend flows PASSED.
 
+## Implemented (2026-07-31) — Phase 5 (Produksi & HPP) + Phase 6 (Penjualan)
+- **Produksi & HPP**: Resep/BOM CRUD (BomPage), halaman Produksi & HPP (ProductionPage):
+  pilih resep → preview kebutuhan bahan (FEFO, cek cukup/tidak) + hitung HPP otomatis
+  (biaya bahan + tenaga kerja + overhead) → proses produksi (konsumsi stok BB, tambah stok BJ,
+  update harga_pokok BJ). Detail order menampilkan bahan terpakai + rincian HPP/unit.
+- **Penjualan (single source of truth)**: SalesPage — buat Sales Order (draft) → Kirim
+  (potong stok BJ + terbitkan Surat Jalan + Invoice; tunai otomatis lunas, kredit → piutang)
+  → Terima Pembayaran (sebagian/lunas). Filter tab status, hitung subtotal/pajak/total live,
+  harga jual auto-fill.
+- **Piutang** (PiutangPage): KPI total piutang & jumlah jatuh tempo, daftar tagihan belum lunas
+  dengan badge overdue/sebagian, aksi bayar langsung.
+- **Cetak dokumen PDF** (lib/pdf.js via jspdf + jspdf-autotable): Invoice, Nota, Surat Jalan
+  dengan header perusahaan, tabel item, ringkasan total & status pembayaran → download PDF.
+- Rute terdaftar di App.js: /produksi/bom, /produksi/order, /penjualan, /penjualan/piutang.
+- Tested: frontend flows 100% PASSED (iteration_2.json), no bugs.
+
 ## Backlog (prioritized)
 ### P0 (next phases per user roadmap)
 - Fase 4 Pembelian: PR → PO → Penerimaan → Invoice supplier → Pembayaran, hutang, retur.
-- Fase 5 Produksi & HPP: BOM/resep, rencana & perintah produksi, konsumsi bahan → hasil produksi, HPP.
-- Fase 6 Penjualan: Sales Order → Surat Jalan → Invoice → Pembayaran, piutang, retur, cetak nota/invoice.
 ### P1
 - Fase 7 Keuangan: kas/bank masuk-keluar, arus kas, laba rugi, piutang/hutang aging.
 - Fase 8 HR & Payroll: absensi, lembur, kasbon, payroll otomatis, slip gaji.
@@ -58,4 +72,5 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Barcode/QR scan kamera, import Excel, multi-level approval, forecasting stok/penjualan, notifikasi email/WA, restore backup, DB transactions untuk ledger.
 
 ## Next Tasks
-- Mulai Fase 4 (Pembelian) yang terhubung ke stok penerimaan & hutang.
+- Mulai Fase 4 (Pembelian) yang terhubung ke stok penerimaan & hutang supplier.
+- Lanjut Fase 7 (Keuangan sederhana).

@@ -174,11 +174,11 @@ export default function SalesPage() {
 
       <Tabs value={status} onValueChange={(v) => { setStatus(v); setPage(1); }} className="mb-4">
         <TabsList data-testid="sales-tabs">
-          <TabsTrigger value="all">Semua</TabsTrigger>
-          <TabsTrigger value="draft">Draft</TabsTrigger>
-          <TabsTrigger value="dikirim">Dikirim</TabsTrigger>
-          <TabsTrigger value="sebagian">Sebagian</TabsTrigger>
-          <TabsTrigger value="lunas">Lunas</TabsTrigger>
+          <TabsTrigger value="all" data-testid="sales-tab-all">Semua</TabsTrigger>
+          <TabsTrigger value="draft" data-testid="sales-tab-draft">Draft</TabsTrigger>
+          <TabsTrigger value="dikirim" data-testid="sales-tab-dikirim">Dikirim</TabsTrigger>
+          <TabsTrigger value="sebagian" data-testid="sales-tab-sebagian">Sebagian</TabsTrigger>
+          <TabsTrigger value="lunas" data-testid="sales-tab-lunas">Lunas</TabsTrigger>
         </TabsList>
       </Tabs>
 
