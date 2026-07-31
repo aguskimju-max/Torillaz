@@ -27,7 +27,7 @@ function drawHeader(doc, company, title, docNo, logoData) {
   const c = company || {};
   let tx = 14;
   if (logoData) {
-    try { doc.addImage(logoData, "PNG", 14, 8, 34, 24); tx = 52; } catch (e) {}
+    try { doc.addImage(logoData, "PNG", 14, 8, 34, 24); tx = 52; } catch (e) { console.error("Gagal menambahkan logo ke PDF", e); }
   }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);

@@ -219,6 +219,9 @@ async def create_movement(payload: dict = Body(...), user=Depends(require("gudan
                               gnama_t, batch, expired_date, qty, avg, in_qty,
                               f"Transfer dari {gnama}. {keterangan or ''}", user, ref=no)
 
+    else:
+        raise HTTPException(status_code=400, detail="Tipe transaksi tidak valid")
+
     await log_audit(user, "create", "gudang", "stock_movement", mv.get("no_transaksi"),
                     f"{TIPE_LABEL.get(mv['tipe'], tipe)} {item.get('nama')} qty {qty}")
     return serialize(mv)

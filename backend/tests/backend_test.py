@@ -11,8 +11,8 @@ import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL",
                           "https://dashboard-kpi-6.preview.emergentagent.com").rstrip("/")
-ADMIN_EMAIL = "aguskimju@gmail.com"
-ADMIN_PASSWORD = "Admin@12345"
+ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "aguskimju@gmail.com")
+ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD", "Admin@12345")
 
 # ---------------------- Fixtures ----------------------
 
