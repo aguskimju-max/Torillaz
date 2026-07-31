@@ -17,8 +17,9 @@ class LoginInput(BaseModel):
 @router.post("/login")
 async def login(request: Request, response: Response, body: LoginInput):
     email = body.email.lower().strip()
-    ip = request.client.host if request.client else "unknown"
-    identifier = f"{ip}:{email}"
+    # Key lockout by email only: request.client.host is the proxy/pod IP behind
+    # k8s ingress and fragments counts across replicas.
+    identifier = f"email:{email}"
     await check_lockout(identifier)
 
     user = await db.users.find_one({"email": email})

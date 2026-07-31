@@ -43,6 +43,7 @@ async def seed_admin():
         await db.users.update_one({"email": email},
                                   {"$set": {"password_hash": hash_password(password),
                                             "role": "super_admin", "is_active": True}})
+        await db.login_attempts.delete_one({"identifier": f"email:{email}"})
 
 
 async def _mk(coll, prefix, nama, **extra):
