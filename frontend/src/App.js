@@ -21,6 +21,10 @@ import SalesPage from "@/pages/penjualan/SalesPage";
 import PiutangPage from "@/pages/penjualan/PiutangPage";
 import KasBankPage from "@/pages/keuangan/KasBankPage";
 import LabaRugiPage from "@/pages/keuangan/LabaRugiPage";
+import AbsensiPage from "@/pages/hr/AbsensiPage";
+import KasbonPage from "@/pages/hr/KasbonPage";
+import PayrollPage from "@/pages/hr/PayrollPage";
+import LaporanPage from "@/pages/LaporanPage";
 
 function FullLoader() {
   return (
@@ -80,6 +84,10 @@ export default function App() {
             <Route path="/penjualan/piutang" element={<Guard module="penjualan"><PiutangPage /></Guard>} />
             <Route path="/keuangan/kas-bank" element={<Guard module="keuangan"><KasBankPage /></Guard>} />
             <Route path="/keuangan/laba-rugi" element={<Guard module="keuangan"><LabaRugiPage /></Guard>} />
+            <Route path="/hr/absensi" element={<Guard module="hr"><AbsensiPage /></Guard>} />
+            <Route path="/hr/kasbon" element={<Guard module="hr"><KasbonPage /></Guard>} />
+            <Route path="/hr/payroll" element={<Guard module="hr"><PayrollPage /></Guard>} />
+            <Route path="/laporan" element={<Guard module="laporan"><LaporanPage /></Guard>} />
             <Route path="/pengaturan/pengguna" element={<Guard module="pengaturan"><UsersPage /></Guard>} />
             <Route path="/pengaturan/role" element={<Guard module="pengaturan"><RolesPage /></Guard>} />
             <Route path="/pengaturan/backup" element={<Guard module="pengaturan"><BackupPage /></Guard>} />

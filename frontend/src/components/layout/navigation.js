@@ -5,7 +5,7 @@ import {
   Receipt, PackagePlus, PackageMinus, SlidersHorizontal, ArrowLeftRight, ClipboardCheck,
   BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup,
   Factory, ChefHat, ShoppingCart, HandCoins,
-  Wallet, Coins, LineChart,
+  Wallet, Coins, LineChart, CalendarCheck, FileBarChart,
 } from "lucide-react";
 
 export const NAV = [
@@ -78,6 +78,23 @@ export const NAV = [
       { to: "/keuangan/kas-bank", label: "Kas & Bank", icon: Coins, module: "keuangan" },
       { to: "/keuangan/laba-rugi", label: "Laba / Rugi", icon: LineChart, module: "keuangan" },
     ],
+  },
+  {
+    label: "HR & Payroll",
+    icon: Users,
+    module: "hr",
+    items: [
+      { to: "/master/karyawan", label: "Data Karyawan", icon: UserSquare2, module: "master" },
+      { to: "/hr/absensi", label: "Absensi", icon: CalendarCheck, module: "hr" },
+      { to: "/hr/kasbon", label: "Kasbon", icon: HandCoins, module: "hr" },
+      { to: "/hr/payroll", label: "Penggajian", icon: Wallet, module: "hr" },
+    ],
+  },
+  {
+    label: "Laporan",
+    icon: FileBarChart,
+    module: "laporan",
+    items: [{ to: "/laporan", label: "Laporan Lengkap", icon: FileBarChart, module: "laporan" }],
   },
   {
     label: "Pengaturan",

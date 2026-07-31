@@ -236,3 +236,51 @@ export async function labaRugiPDF(report, company, periodLabel) {
   doc.text(rupiah(report.laba_bersih), 196, fy + 8, { align: "right" });
   doc.save(`LabaRugi-${report.start}_${report.end}.pdf`);
 }
+
+export async function slipGajiPDF(p, company) {
+  const doc = new jsPDF();
+  const logo = await loadLogo();
+  const y = drawHeader(doc, company, "SLIP GAJI", `${p.no} · ${p.periode}`, logo);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...SLATE);
+  doc.text(p.karyawan_nama || "-", 14, y);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  doc.text(p.jabatan_nama || "", 14, y + 5);
+  doc.text(`Periode: ${p.periode}`, 196, y, { align: "right" });
+  const body = [
+    [{ content: "PENDAPATAN", styles: { fontStyle: "bold", textColor: GREY } }, ""],
+    ["   Gaji Pokok", rupiah(p.gaji_pokok)],
+    ["   Tunjangan", rupiah(p.tunjangan)],
+    [`   Lembur (${angka(p.jam_lembur)} jam)`, rupiah(p.upah_lembur)],
+    [{ content: "Total Pendapatan", styles: { fontStyle: "bold" } }, { content: rupiah(p.gross), styles: { fontStyle: "bold" } }],
+    [{ content: "POTONGAN", styles: { fontStyle: "bold", textColor: GREY } }, ""],
+    [`   Alpha (${p.hari_alpha} hari)`, `(${rupiah(p.potongan_alpha)})`],
+    [`   BPJS (${angka(p.bpjs_persen)}%)`, `(${rupiah(p.bpjs)})`],
+    [`   Pajak (${angka(p.pajak_persen)}%)`, `(${rupiah(p.pajak)})`],
+    ["   Potongan Kasbon", `(${rupiah(p.kasbon_potong)})`],
+    [{ content: "Total Potongan", styles: { fontStyle: "bold" } }, { content: `(${rupiah(p.total_potongan)})`, styles: { fontStyle: "bold" } }],
+  ];
+  autoTable(doc, {
+    startY: y + 12, body, theme: "plain",
+    styles: { fontSize: 10, textColor: SLATE, cellPadding: 1.6 },
+    columnStyles: { 1: { halign: "right" } }, margin: { left: 14, right: 14 },
+  });
+  let fy = doc.lastAutoTable.finalY + 4;
+  doc.setDrawColor(...EMERALD);
+  doc.setLineWidth(0.6);
+  doc.line(14, fy, 196, fy);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(...EMERALD);
+  doc.text("GAJI BERSIH", 14, fy + 8);
+  doc.text(rupiah(p.gaji_bersih), 196, fy + 8, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...GREY);
+  doc.text(`Kehadiran: ${p.hari_hadir} hadir · ${p.hari_izin} izin · ${p.hari_sakit} sakit · ${p.hari_alpha} alpha`, 14, fy + 15);
+  footerNote(doc, "Slip gaji ini sah tanpa tanda tangan basah.");
+  doc.save(`SlipGaji-${p.karyawan_nama}-${p.periode}.pdf`);
+}
