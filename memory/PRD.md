@@ -92,6 +92,8 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - **HR backend (hr_router.py)**: absensi harian (upsert per karyawan+tanggal), kasbon (ajukan/bayar/potong
   otomatis saat payroll), payroll generate otomatis (gaji pokok + tunjangan + lembur − alpha − BPJS% − pajak% −
   kasbon), bayar payroll → kas keluar "Gaji Karyawan" (beban) + kasbon lunas, /hr/summary.
+  Rumus gaji (update 2026-07-31): gaji_harian = gaji_pokok ÷ hari_kerja; gaji_diperoleh = gaji_harian × hari_hadir
+  (bayar per kehadiran, tanpa potongan alpha). Gross = gaji_diperoleh + tunjangan + lembur; potongan = BPJS + pajak + kasbon.
 - **HR frontend**: AbsensiPage (grid harian), KasbonPage, PayrollPage (generate + detail + slip PDF + bayar).
 - **Slip Gaji PDF** (slipGajiPDF) berlogo.
 - **Dashboard Fase 9**: KPI penjualan/keuangan (omzet hari/bulan, laba kotor, piutang, total produksi),

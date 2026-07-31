@@ -250,14 +250,15 @@ export async function slipGajiPDF(p, company) {
   doc.setTextColor(...GREY);
   doc.text(p.jabatan_nama || "", 14, y + 5);
   doc.text(`Periode: ${p.periode}`, 196, y, { align: "right" });
+  const gajiHarian = p.gaji_harian != null ? p.gaji_harian : (p.hari_kerja ? p.gaji_pokok / p.hari_kerja : 0);
+  const gajiPokokDiperoleh = p.gaji_diperoleh != null ? p.gaji_diperoleh : p.gaji_pokok;
   const body = [
     [{ content: "PENDAPATAN", styles: { fontStyle: "bold", textColor: GREY } }, ""],
-    ["   Gaji Pokok", rupiah(p.gaji_pokok)],
+    [`   Gaji Pokok (${p.hari_hadir} hr × ${rupiah(gajiHarian)})`, rupiah(gajiPokokDiperoleh)],
     ["   Tunjangan", rupiah(p.tunjangan)],
     [`   Lembur (${angka(p.jam_lembur)} jam)`, rupiah(p.upah_lembur)],
     [{ content: "Total Pendapatan", styles: { fontStyle: "bold" } }, { content: rupiah(p.gross), styles: { fontStyle: "bold" } }],
     [{ content: "POTONGAN", styles: { fontStyle: "bold", textColor: GREY } }, ""],
-    [`   Alpha (${p.hari_alpha} hari)`, `(${rupiah(p.potongan_alpha)})`],
     [`   BPJS (${angka(p.bpjs_persen)}%)`, `(${rupiah(p.bpjs)})`],
     [`   Pajak (${angka(p.pajak_persen)}%)`, `(${rupiah(p.pajak)})`],
     ["   Potongan Kasbon", `(${rupiah(p.kasbon_potong)})`],

@@ -105,13 +105,12 @@ export default function PayrollPage() {
             <div className="text-sm">
               <div className="flex justify-between text-xs text-slate-400 mb-2"><span>{detail.no}</span><span>Periode {detail.periode}</span></div>
               <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 mt-2">Pendapatan</div>
-              <Line label="Gaji Pokok" value={detail.gaji_pokok} />
+              <Line label={`Gaji Pokok (${detail.hari_hadir} hr × ${rupiah(detail.gaji_harian != null ? detail.gaji_harian : (detail.hari_kerja ? detail.gaji_pokok / detail.hari_kerja : 0))})`} value={detail.gaji_diperoleh != null ? detail.gaji_diperoleh : detail.gaji_pokok} />
               <Line label="Tunjangan" value={detail.tunjangan} />
               <Line label={`Lembur (${angka(detail.jam_lembur)} jam)`} value={detail.upah_lembur} />
               <div className="border-t border-slate-200 my-1" />
               <Line label="Total Pendapatan" value={detail.gross} bold />
               <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 mt-3">Potongan</div>
-              <Line label={`Alpha (${detail.hari_alpha} hr)`} value={detail.potongan_alpha} minus tone="rose" />
               <Line label={`BPJS (${angka(detail.bpjs_persen)}%)`} value={detail.bpjs} minus tone="rose" />
               <Line label={`Pajak (${angka(detail.pajak_persen)}%)`} value={detail.pajak} minus tone="rose" />
               <Line label="Potongan Kasbon" value={detail.kasbon_potong} minus tone="rose" />

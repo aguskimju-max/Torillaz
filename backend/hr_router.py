@@ -189,24 +189,26 @@ async def generate_payroll(payload: dict = Body(...), user=Depends(require("hr",
         gaji_pokok = float(kar.get("gaji_pokok") or 0)
         tunjangan = float(kar.get("tunjangan") or 0)
         tarif_lembur = float(kar.get("tarif_lembur") or 0)
+        gaji_harian = round(gaji_pokok / hari_kerja, 2) if hari_kerja else 0
+        gaji_diperoleh = round(gaji_harian * rec["hadir"], 2)
         upah_lembur = round(rec["jam_lembur"] * tarif_lembur, 2)
-        potongan_alpha = round((gaji_pokok / hari_kerja) * rec["alpha"], 2) if hari_kerja else 0
-        bpjs = round((gaji_pokok + tunjangan) * bpjs_persen / 100, 2)
-        pajak = round((gaji_pokok + tunjangan) * pajak_persen / 100, 2)
-        gross = round(gaji_pokok + tunjangan + upah_lembur, 2)
-        before_kasbon = round(gross - potongan_alpha - bpjs - pajak, 2)
+        bpjs = round((gaji_diperoleh + tunjangan) * bpjs_persen / 100, 2)
+        pajak = round((gaji_diperoleh + tunjangan) * pajak_persen / 100, 2)
+        gross = round(gaji_diperoleh + tunjangan + upah_lembur, 2)
+        before_kasbon = round(gross - bpjs - pajak, 2)
         kasbon_sisa = await _active_kasbon_sisa(kid)
         kasbon_potong = round(min(kasbon_sisa, max(before_kasbon, 0)), 2)
-        total_potongan = round(potongan_alpha + bpjs + pajak + kasbon_potong, 2)
+        total_potongan = round(bpjs + pajak + kasbon_potong, 2)
         gaji_bersih = round(gross - total_potongan, 2)
         doc = {
             "periode": periode, "karyawan_id": kid, "karyawan_nama": kar.get("nama"),
             "jabatan_nama": jab.get(str(kar.get("jabatan_id"))) or "-",
-            "gaji_pokok": gaji_pokok, "tunjangan": tunjangan,
+            "gaji_pokok": gaji_pokok, "gaji_harian": gaji_harian, "gaji_diperoleh": gaji_diperoleh,
+            "tunjangan": tunjangan,
             "hari_hadir": rec["hadir"], "hari_izin": rec["izin"], "hari_sakit": rec["sakit"],
             "hari_alpha": rec["alpha"], "hari_kerja": hari_kerja,
             "jam_lembur": rec["jam_lembur"], "tarif_lembur": tarif_lembur, "upah_lembur": upah_lembur,
-            "potongan_alpha": potongan_alpha, "bpjs_persen": bpjs_persen, "bpjs": bpjs,
+            "potongan_alpha": 0, "bpjs_persen": bpjs_persen, "bpjs": bpjs,
             "pajak_persen": pajak_persen, "pajak": pajak,
             "kasbon_potong": kasbon_potong, "total_potongan": total_potongan,
             "gross": gross, "gaji_bersih": gaji_bersih,
