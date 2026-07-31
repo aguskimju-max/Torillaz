@@ -197,9 +197,37 @@ Auth uses httpOnly cookies (access_token + refresh_token). Login also returns ac
         f.write(content)
 
 
+async def seed_production():
+    if await db.master_bom.count_documents({}) > 0:
+        return
+    bj = await db.master_barang_jadi.find_one({"nama": "Roti Coklat", "deleted_at": None})
+    if not bj:
+        return
+    wanted = {"Tepung Terigu": 0.05, "Gula Pasir": 0.02, "Mentega": 0.015,
+              "Coklat Bubuk": 0.01, "Box Kemasan": 1}
+    items = []
+    for nama, qty in wanted.items():
+        bb = await db.master_bahan_baku.find_one({"nama": nama, "deleted_at": None})
+        if bb:
+            items.append({"item_id": str(bb["_id"]), "item_nama": bb.get("nama"),
+                          "kode": bb.get("kode"), "satuan": bb.get("satuan_nama") or "",
+                          "qty": qty})
+    if not items:
+        return
+    await db.master_bom.insert_one({
+        "kode": await get_next_code("BOM"),
+        "barang_jadi_id": str(bj["_id"]), "barang_jadi_nama": bj.get("nama"),
+        "nama": f"Resep {bj.get('nama')}", "output_qty": 1, "satuan_output": bj.get("satuan_nama") or "",
+        "items": items, "biaya_tk": 500, "biaya_overhead": 300,
+        "is_active": True, "deleted_at": None,
+        "created_at": now_iso(), "created_by": "system", "updated_at": now_iso(), "updated_by": "system",
+    })
+
+
 async def run_all():
     await ensure_indexes()
     await seed_roles()
     await seed_admin()
     await seed_sample_data()
+    await seed_production()
     await write_test_credentials()

@@ -83,6 +83,47 @@ async def dashboard(user=Depends(require("dashboard", "view"))):
 
     movement_today = await db.stock_movements.count_documents({"created_at": {"$regex": f"^{today}"}})
 
+    # sales metrics
+    month_prefix = now.strftime("%Y-%m")
+    year_prefix = now.strftime("%Y")
+    valid_status = {"dikirim", "sebagian", "lunas"}
+    omzet_hari = omzet_bulan = omzet_tahun = laba_kotor = piutang_total = 0
+    total_transaksi = 0
+    top_products = {}
+    top_customers = {}
+    async for so in db.sales_orders.find({}):
+        if so.get("status") in valid_status:
+            t = so.get("total", 0)
+            tgl = so.get("tanggal", "") or ""
+            if tgl.startswith(today):
+                omzet_hari += t
+            if tgl.startswith(month_prefix):
+                omzet_bulan += t
+                laba_kotor += so.get("laba_kotor", 0)
+            if tgl.startswith(year_prefix):
+                omzet_tahun += t
+                total_transaksi += 1
+                top_customers[so.get("pelanggan_nama", "-")] = top_customers.get(so.get("pelanggan_nama", "-"), 0) + t
+                for it in so.get("items", []):
+                    top_products[it["item_nama"]] = top_products.get(it["item_nama"], 0) + it.get("subtotal", 0)
+        if so.get("sisa", 0) > 0 and so.get("status") in {"dikirim", "sebagian"}:
+            piutang_total += so.get("sisa", 0)
+
+    chart_sales = []
+    for i in range(6, -1, -1):
+        day = (now - timedelta(days=i)).date().isoformat()
+        oms = 0
+        async for so in db.sales_orders.find({"tanggal": {"$regex": f"^{day}"}}):
+            if so.get("status") in valid_status:
+                oms += so.get("total", 0)
+        chart_sales.append({"tanggal": day, "omzet": round(oms, 2)})
+
+    top_produk = sorted([{"nama": k, "nilai": round(v, 2)} for k, v in top_products.items()],
+                        key=lambda x: x["nilai"], reverse=True)[:10]
+    top_pelanggan = sorted([{"nama": k, "nilai": round(v, 2)} for k, v in top_customers.items()],
+                          key=lambda x: x["nilai"], reverse=True)[:10]
+    total_produksi = await db.production_orders.count_documents({})
+
     return {
         "kpi": {
             "nilai_persediaan": round(nilai_bb + nilai_bj, 2),
@@ -98,11 +139,19 @@ async def dashboard(user=Depends(require("dashboard", "view"))):
             "expiring_count": len(expiring),
             "negative_count": len(negative),
             "movement_today": movement_today,
-            # placeholders for future phases
-            "omzet_hari_ini": 0, "omzet_bulan": 0, "saldo_kas": 0,
-            "piutang": 0, "hutang": 0, "laba_kotor": 0,
+            "omzet_hari_ini": round(omzet_hari, 2),
+            "omzet_bulan": round(omzet_bulan, 2),
+            "omzet_tahun": round(omzet_tahun, 2),
+            "total_transaksi": total_transaksi,
+            "piutang": round(piutang_total, 2),
+            "laba_kotor": round(laba_kotor, 2),
+            "total_produksi": total_produksi,
+            "saldo_kas": 0, "hutang": 0,
         },
         "chart_movement": chart,
+        "chart_sales": chart_sales,
+        "top_products": top_produk,
+        "top_customers": top_pelanggan,
         "top_items": tops[:10],
         "low_stock": low_stock[:10],
         "expiring": sorted(expiring, key=lambda x: x.get("expired_date") or "")[:10],

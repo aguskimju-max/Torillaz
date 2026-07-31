@@ -4,6 +4,7 @@ import {
   Wheat, Package, UserSquare2, Briefcase, Network, Landmark, Percent, CreditCard,
   Receipt, PackagePlus, PackageMinus, SlidersHorizontal, ArrowLeftRight, ClipboardCheck,
   BookOpen, ListChecks, UserCog, ShieldCheck, DatabaseBackup,
+  Factory, ChefHat, ShoppingCart, HandCoins,
 } from "lucide-react";
 
 export const NAV = [
@@ -48,6 +49,24 @@ export const NAV = [
       { to: "/stok/transfer", label: "Transfer Gudang", icon: ArrowLeftRight, module: "gudang" },
       { to: "/stok/opname", label: "Stock Opname", icon: ClipboardCheck, module: "gudang" },
       { to: "/stok/kartu", label: "Kartu Stok", icon: BookOpen, module: "gudang" },
+    ],
+  },
+  {
+    label: "Produksi",
+    icon: Factory,
+    module: "produksi",
+    items: [
+      { to: "/produksi/bom", label: "Resep / BOM", icon: ChefHat, module: "produksi" },
+      { to: "/produksi/order", label: "Produksi & HPP", icon: Factory, module: "produksi" },
+    ],
+  },
+  {
+    label: "Penjualan",
+    icon: ShoppingCart,
+    module: "penjualan",
+    items: [
+      { to: "/penjualan", label: "Transaksi Penjualan", icon: ShoppingCart, module: "penjualan" },
+      { to: "/penjualan/piutang", label: "Piutang", icon: HandCoins, module: "penjualan" },
     ],
   },
   {

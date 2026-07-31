@@ -92,6 +92,53 @@ async def gudang_name(gudang_id):
     return g.get("nama") if g else gudang_id
 
 
+async def available_qty(item_type, item_id, gudang_id):
+    total = 0
+    async for b in db.stock_balances.find(
+            {"item_type": item_type, "item_id": item_id, "gudang_id": gudang_id}):
+        total += b.get("qty", 0)
+    return round(total, 4)
+
+
+async def avg_price_of(item_type, item_id, gudang_id=None):
+    flt = {"item_type": item_type, "item_id": item_id}
+    if gudang_id:
+        flt["gudang_id"] = gudang_id
+    qty = val = 0
+    async for b in db.stock_balances.find(flt):
+        qty += b.get("qty", 0)
+        val += b.get("qty", 0) * b.get("avg_price", 0)
+    return round(val / qty, 4) if qty > 0 else 0
+
+
+async def consume_stock_fifo(item_type, item_id, gudang_id, qty, item, gudang_nama,
+                             user, tipe, no, keterangan=""):
+    """Reduce stock across batches FIFO/FEFO. Returns total cost consumed."""
+    avail = await available_qty(item_type, item_id, gudang_id)
+    if avail + 1e-9 < qty:
+        raise HTTPException(status_code=400,
+                            detail=f"Stok {item.get('nama')} tidak cukup (tersedia {avail}, butuh {qty})")
+    remaining = qty
+    cost_total = 0.0
+    cursor = db.stock_balances.find(
+        {"item_type": item_type, "item_id": item_id, "gudang_id": gudang_id, "qty": {"$gt": 0}}
+    ).sort([("expired_date", 1), ("updated_at", 1)])
+    balances = [b async for b in cursor]
+    for b in balances:
+        if remaining <= 1e-9:
+            break
+        take = min(b["qty"], remaining)
+        avg = b.get("avg_price", 0)
+        cost_total += take * avg
+        _, new_qty, _ = await apply_delta(item_type, item_id, gudang_id,
+                                          b.get("batch"), b.get("expired_date"), -take)
+        await record_movement(no, tipe, item, item_type, item_id, gudang_id, gudang_nama,
+                              b.get("batch"), b.get("expired_date"), -take, avg, new_qty,
+                              keterangan, user, ref=no)
+        remaining -= take
+    return round(cost_total, 2)
+
+
 @router.post("/movement")
 async def create_movement(payload: dict = Body(...), user=Depends(require("gudang", "add"))):
     tipe = payload.get("tipe")
