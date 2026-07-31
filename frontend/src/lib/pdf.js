@@ -6,34 +6,55 @@ const EMERALD = [5, 150, 105];
 const SLATE = [51, 65, 85];
 const GREY = [120, 120, 120];
 
-function drawHeader(doc, company, title, docNo) {
+const LOGO_URL = "/tortillaz-logo.png";
+let _logoCache;
+async function loadLogo() {
+  if (_logoCache !== undefined) return _logoCache;
+  try {
+    const resp = await fetch(LOGO_URL);
+    const blob = await resp.blob();
+    _logoCache = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onloadend = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+  } catch (e) { _logoCache = null; }
+  return _logoCache;
+}
+
+function drawHeader(doc, company, title, docNo, logoData) {
   const c = company || {};
+  let tx = 14;
+  if (logoData) {
+    try { doc.addImage(logoData, "PNG", 14, 8, 34, 24); tx = 52; } catch (e) {}
+  }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.setTextColor(...SLATE);
-  doc.text(c.nama || "ERP Terpadu", 14, 18);
+  doc.text(c.nama || "Torillaz Tortilla", tx, 15);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(...GREY);
-  let y = 23.5;
-  if (c.alamat) { doc.text(String(c.alamat), 14, y); y += 4; }
+  let y = 20.5;
+  if (c.alamat) { doc.text(String(c.alamat), tx, y); y += 4; }
   const line2 = [c.telepon && `Telp: ${c.telepon}`, c.email].filter(Boolean).join("   ");
-  if (line2) { doc.text(line2, 14, y); y += 4; }
-  if (c.npwp) { doc.text(`NPWP: ${c.npwp}`, 14, y); y += 4; }
+  if (line2) { doc.text(line2, tx, y); y += 4; }
+  if (c.npwp) { doc.text(`NPWP: ${c.npwp}`, tx, y); y += 4; }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   doc.setTextColor(...EMERALD);
-  doc.text(title, 196, 18, { align: "right" });
+  doc.text(title, 196, 16, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...GREY);
-  if (docNo) doc.text(docNo, 196, 24, { align: "right" });
+  if (docNo) doc.text(docNo, 196, 22, { align: "right" });
 
   doc.setDrawColor(...EMERALD);
   doc.setLineWidth(0.8);
-  doc.line(14, 33, 196, 33);
+  doc.line(14, 34, 196, 34);
   return 40;
 }
 
@@ -135,9 +156,10 @@ function footerNote(doc, text) {
   doc.text(text, 105, 288, { align: "center" });
 }
 
-export function invoicePDF(so, company, customer) {
+export async function invoicePDF(so, company, customer) {
   const doc = new jsPDF();
-  let y = drawHeader(doc, company, "INVOICE", so.no_invoice || so.no_so);
+  const logo = await loadLogo();
+  let y = drawHeader(doc, company, "INVOICE", so.no_invoice || so.no_so, logo);
   y = infoBlock(doc, y, so, customer, [
     ["No. Invoice", so.no_invoice || "-"],
     ["Jatuh Tempo", so.tipe === "kredit" ? tanggal(so.jatuh_tempo) : "Tunai"],
@@ -149,9 +171,10 @@ export function invoicePDF(so, company, customer) {
   doc.save(`Invoice-${so.no_invoice || so.no_so}.pdf`);
 }
 
-export function notaPDF(so, company, customer) {
+export async function notaPDF(so, company, customer) {
   const doc = new jsPDF();
-  let y = drawHeader(doc, company, "NOTA", so.no_so);
+  const logo = await loadLogo();
+  let y = drawHeader(doc, company, "NOTA", so.no_so, logo);
   y = infoBlock(doc, y, so, customer, [["No. SO", so.no_so], ["No. Invoice", so.no_invoice || "-"]]);
   const tableEnd = itemsTable(doc, y, so, true);
   const afterTotals = totalsBlock(doc, tableEnd, so);
@@ -160,9 +183,10 @@ export function notaPDF(so, company, customer) {
   doc.save(`Nota-${so.no_so}.pdf`);
 }
 
-export function suratJalanPDF(so, company, customer) {
+export async function suratJalanPDF(so, company, customer) {
   const doc = new jsPDF();
-  let y = drawHeader(doc, company, "SURAT JALAN", so.no_surat_jalan || so.no_so);
+  const logo = await loadLogo();
+  let y = drawHeader(doc, company, "SURAT JALAN", so.no_surat_jalan || so.no_so, logo);
   y = infoBlock(doc, y, so, customer, [
     ["No. Surat Jalan", so.no_surat_jalan || "-"],
     ["No. SO", so.no_so],
@@ -182,9 +206,10 @@ export function suratJalanPDF(so, company, customer) {
   doc.save(`SuratJalan-${so.no_surat_jalan || so.no_so}.pdf`);
 }
 
-export function labaRugiPDF(report, company, periodLabel) {
+export async function labaRugiPDF(report, company, periodLabel) {
   const doc = new jsPDF();
-  const y = drawHeader(doc, company, "LABA / RUGI", periodLabel);
+  const logo = await loadLogo();
+  const y = drawHeader(doc, company, "LABA / RUGI", periodLabel, logo);
   const body = [];
   body.push([{ content: "PENDAPATAN", styles: { fontStyle: "bold", textColor: GREY } }, ""]);
   body.push(["   Penjualan", rupiah(report.pendapatan)]);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Factory, Loader2, Lock, Mail } from "lucide-react";
+import { Loader2, Lock, Mail } from "lucide-react";
 import { useAuth, apiError } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,14 +35,8 @@ export default function Login() {
       {/* Left: form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-sm animate-fade-in-up">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-11 w-11 rounded-xl bg-emerald-600 flex items-center justify-center">
-              <Factory className="h-6 w-6 text-white" strokeWidth={2} />
-            </div>
-            <div>
-              <div className="font-heading font-bold text-lg text-slate-900">ERP Terpadu</div>
-              <div className="text-xs text-slate-500 uppercase tracking-wider">Manajemen Usaha</div>
-            </div>
+          <div className="mb-8">
+            <img src="/tortillaz-logo.png" alt="Torillaz Tortilla" className="h-20 w-auto object-contain" />
           </div>
 
           <h1 className="font-heading text-2xl font-semibold text-slate-900">Selamat Datang</h1>

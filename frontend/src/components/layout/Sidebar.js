@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, Factory } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { NAV } from "./navigation";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -72,13 +72,9 @@ export default function Sidebar({ onNavigate }) {
   const { user } = useAuth();
   return (
     <div className="flex flex-col h-full bg-slate-900">
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-slate-800 flex-shrink-0">
-        <div className="h-9 w-9 rounded-lg bg-emerald-600 flex items-center justify-center">
-          <Factory className="h-5 w-5 text-white" strokeWidth={2} />
-        </div>
-        <div className="leading-tight">
-          <div className="font-heading font-bold text-white text-sm">ERP Terpadu</div>
-          <div className="text-[10px] text-slate-400 uppercase tracking-wider">Manajemen Usaha</div>
+      <div className="px-4 py-3 border-b border-slate-800 flex-shrink-0">
+        <div className="bg-white rounded-lg px-3 py-2 flex items-center justify-center">
+          <img src="/tortillaz-logo.png" alt="Torillaz Tortilla" className="mx-auto max-h-20 w-auto object-contain" />
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto py-3">

@@ -88,6 +88,7 @@ export default function AppLayout() {
           >
             <Menu className="h-5 w-5 text-slate-700" />
           </button>
+          <img src="/tortillaz-logo.png" alt="Torillaz" className="lg:hidden h-9 w-auto object-contain" />
           <div className="flex-1" />
           <NotificationBell />
           <div className="hidden sm:flex flex-col items-end leading-tight mr-1">
