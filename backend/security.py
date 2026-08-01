@@ -121,3 +121,11 @@ async def get_current_user(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Sesi berakhir, silakan login kembali")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token tidak valid")
+
+
+async def optional_current_user(request: Request):
+    """Silent session probe: returns the user dict or None instead of raising 401."""
+    try:
+        return await get_current_user(request)
+    except HTTPException:
+        return None

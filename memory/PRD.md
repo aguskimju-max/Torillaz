@@ -144,6 +144,11 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Semua data-testid & perilaku dipertahankan persis. Backend tidak diubah.
 - Tested: testing_agent frontend regression 100% PASS (iteration_5.json) — semua halaman render, tab switch, dialog, export tanpa error.
 
+## Fix 401 Console (2026-08-01)
+- Root cause: frontend memprobe sesi via `GET /api/auth/me` saat load/logout; ketika belum login endpoint balas 401 → browser mencatat 401 di console (bukan dari polling notifikasi seperti dugaan awal).
+- Fix: tambah endpoint non-error `GET /api/auth/session` (Depends optional_current_user) yang balas 200 `{authenticated, user}`; AuthContext.fetchMe kini pakai `/auth/session`. Route bisnis terproteksi TETAP 401 (keamanan utuh). `/auth/me` dibiarkan.
+- Tested: curl (unauth 200 authenticated:false, auth 200 + user), screenshot reproduksi login→logout = 0 error 4xx di console. Login/logout tetap normal.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

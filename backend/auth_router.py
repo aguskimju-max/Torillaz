@@ -4,7 +4,8 @@ from pydantic import BaseModel, EmailStr
 from db import db, oid, now_iso, log_audit
 from security import (hash_password, verify_password, create_access_token,
                       create_refresh_token, set_auth_cookies, clear_auth_cookies,
-                      get_current_user, check_lockout, register_failed, clear_attempts)
+                      get_current_user, optional_current_user, check_lockout,
+                      register_failed, clear_attempts)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -56,6 +57,14 @@ async def logout(response: Response, user=Depends(get_current_user)):
 @router.get("/me")
 async def me(user=Depends(get_current_user)):
     return user
+
+
+@router.get("/session")
+async def session(user=Depends(optional_current_user)):
+    """Non-erroring session probe used by the frontend on load (avoids 401 console noise)."""
+    if not user:
+        return {"authenticated": False, "user": None}
+    return {"authenticated": True, "user": user}
 
 
 @router.post("/refresh")
