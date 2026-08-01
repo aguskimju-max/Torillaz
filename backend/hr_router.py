@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Body
 from typing import Optional
 from datetime import datetime, timezone
+import calendar
 
 from db import db, oid, now_iso, get_next_code, serialize, log_audit
 from rbac import require
@@ -101,6 +102,47 @@ async def attendance_recap(periode: str, user=Depends(require("hr", "view"))):
             "tercatat": r["hadir"] + r["izin"] + r["sakit"] + r["alpha"] + r["libur"],
         })
     return {"periode": periode, "items": rows}
+
+
+@router.get("/attendance/monthly")
+async def attendance_monthly(periode: str, user=Depends(require("hr", "view"))):
+    try:
+        year, month = int(periode[:4]), int(periode[5:7])
+        days_in_month = calendar.monthrange(year, month)[1]
+    except Exception:
+        raise HTTPException(status_code=400, detail="Periode tidak valid (format YYYY-MM)")
+    jab = await _jabatan_map()
+    records = {}
+    async for a in db.hr_attendance.find({"tanggal": {"$regex": f"^{periode}"}}):
+        records.setdefault(a.get("karyawan_id"), []).append(a)
+    rows = []
+    async for kar in db.master_karyawan.find({"deleted_at": None, "is_active": True}).sort("nama", 1):
+        kid = str(kar["_id"])
+        daily, lembur_daily = {}, {}
+        summary = {"hadir": 0, "izin": 0, "sakit": 0, "alpha": 0, "libur": 0, "jam_lembur": 0.0}
+        for a in records.get(kid, []):
+            tgl = a.get("tanggal", "")
+            try:
+                day = str(int(tgl[8:10]))
+            except Exception:
+                continue
+            st = a.get("status", "hadir")
+            daily[day] = st
+            lem = float(a.get("jam_lembur") or 0)
+            if lem:
+                lembur_daily[day] = lem
+            if st in summary:
+                summary[st] += 1
+            summary["jam_lembur"] += lem
+        rows.append({
+            "karyawan_id": kid, "karyawan_nama": kar.get("nama"),
+            "jabatan_nama": jab.get(str(kar.get("jabatan_id"))) or "-",
+            "daily": daily, "lembur_daily": lembur_daily,
+            "hadir": summary["hadir"], "izin": summary["izin"], "sakit": summary["sakit"],
+            "alpha": summary["alpha"], "libur": summary["libur"], "jam_lembur": summary["jam_lembur"],
+            "tercatat": summary["hadir"] + summary["izin"] + summary["sakit"] + summary["alpha"] + summary["libur"],
+        })
+    return {"periode": periode, "days": days_in_month, "items": rows}
 
 
 # ---------------- KASBON ----------------

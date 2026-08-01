@@ -122,6 +122,15 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
   dari GET /api/hr/attendance/recap, tampil sebelum tabel payroll agar bisa dicek sebelum generate.
 - Tested: backend curl (summary + recap + reset POST non-destruktif) PASS; screenshot kedua halaman render OK.
 
+## Implemented (2026-08-01) — Menu Rekap Absensi
+- Menu baru **Rekap Absensi** (/hr/rekap-absensi) di grup HR & Payroll (setelah Absensi).
+- Backend: `GET /api/hr/attendance/monthly?periode=YYYY-MM` → matriks harian per karyawan
+  (status per tanggal + jam lembur) + ringkasan (hadir/izin/sakit/alpha/libur/lembur/tercatat) + jumlah hari.
+- Frontend (RekapAbsensiPage.js): pilih periode (bulan), tabel Ringkasan (dengan baris TOTAL),
+  legenda H/I/S/A/L, matriks Detail Harian (kolom tgl 1..N, sel berwarna sesuai status, titik indigo
+  bila ada lembur), Export Excel/PDF (ExportButtons).
+- Tested: backend curl (matriks + ringkasan) PASS; screenshot halaman render OK sesuai data absensi.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

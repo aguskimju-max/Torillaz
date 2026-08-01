@@ -23,6 +23,7 @@ import PiutangPage from "@/pages/penjualan/PiutangPage";
 import KasBankPage from "@/pages/keuangan/KasBankPage";
 import LabaRugiPage from "@/pages/keuangan/LabaRugiPage";
 import AbsensiPage from "@/pages/hr/AbsensiPage";
+import RekapAbsensiPage from "@/pages/hr/RekapAbsensiPage";
 import KasbonPage from "@/pages/hr/KasbonPage";
 import PayrollPage from "@/pages/hr/PayrollPage";
 import LaporanPage from "@/pages/LaporanPage";
@@ -86,6 +87,7 @@ export default function App() {
             <Route path="/keuangan/kas-bank" element={<Guard module="keuangan"><KasBankPage /></Guard>} />
             <Route path="/keuangan/laba-rugi" element={<Guard module="keuangan"><LabaRugiPage /></Guard>} />
             <Route path="/hr/absensi" element={<Guard module="hr"><AbsensiPage /></Guard>} />
+            <Route path="/hr/rekap-absensi" element={<Guard module="hr"><RekapAbsensiPage /></Guard>} />
             <Route path="/hr/kasbon" element={<Guard module="hr"><KasbonPage /></Guard>} />
             <Route path="/hr/payroll" element={<Guard module="hr"><PayrollPage /></Guard>} />
             <Route path="/laporan" element={<Guard module="laporan"><LaporanPage /></Guard>} />

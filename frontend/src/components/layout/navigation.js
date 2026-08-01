@@ -86,6 +86,7 @@ export const NAV = [
     items: [
       { to: "/master/karyawan", label: "Data Karyawan", icon: UserSquare2, module: "master" },
       { to: "/hr/absensi", label: "Absensi", icon: CalendarCheck, module: "hr" },
+      { to: "/hr/rekap-absensi", label: "Rekap Absensi", icon: FileBarChart, module: "hr" },
       { to: "/hr/kasbon", label: "Kasbon", icon: HandCoins, module: "hr" },
       { to: "/hr/payroll", label: "Penggajian", icon: Wallet, module: "hr" },
     ],
