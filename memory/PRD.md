@@ -137,6 +137,13 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - CATATAN false-positive (tidak diubah, memang sudah benar): `is None`/`is not None` di db.py/stock_router/production_router (idiom Python benar); deps hook di AuthContext/RolesPage/ProductionPage/SalesPage (setter useState & konstanta modul memang stabil; deps debounce sengaja dibatasi); key index pada tabel READ-ONLY (preview/detail) aman; `mv`/`days_in_month` selalu ter-assign sebelum dipakai.
 - SENGAJA DILEWATI (risiko regresi pada logic bisnis yang sudah teruji, sesuai arahan): refactor kompleksitas dashboard()/process()/generate_payroll() & split komponen LaporanPage/PayrollPage/Dashboard.
 
+## Refactor Komponen (2026-08-01) — behavior-preserving
+- Dashboard dipecah → `pages/dashboard/{DashboardKpis, SalesTrendChart, MovementChart, RankedList, StockLists}.jsx`. Dashboard.js kini orchestrator tipis.
+- Laporan dipecah per-tab → `pages/laporan/{RangeBar, PenjualanReport, LabaRugiReport, PersediaanReport, ProduksiReport, PayrollReport}.jsx`; kolom tabel/ekspor jadi konstanta modul (hindari re-render). LaporanPage.js menyimpan state+query, render komponen tab.
+- Payroll dipecah → `pages/hr/payroll/{PayrollKpis, PayrollRecap, SlipDetailDialog, BayarDialog, DeleteSlipDialog}.jsx`. PayrollPage.js menyimpan state+mutasi+kolom.
+- Semua data-testid & perilaku dipertahankan persis. Backend tidak diubah.
+- Tested: testing_agent frontend regression 100% PASS (iteration_5.json) — semua halaman render, tab switch, dialog, export tanpa error.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
