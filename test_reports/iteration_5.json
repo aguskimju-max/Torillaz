@@ -1,0 +1,24 @@
+{
+  "summary": "Regression frontend test after behavior-preserving refactor of Dashboard, Laporan and Payroll pages. All three pages render correctly with same data-testids, no white screens, no JS/page errors. All KPI cards, charts, tables, tabs, dialogs and export buttons work identically to pre-refactor behavior.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_details": {
+    "dashboard": "All 15 KPI cards render with values (Rp 13.813.143 total, 7 low stock, etc). All sections present: Tren Omzet chart, Produk Terlaris list (Roti Coklat Rp 416.000), Pergerakan Stok bar chart, Top Nilai Persediaan, Perlu Restock, Transaksi Stok Terbaru.",
+    "laporan": "All 5 tabs (tab-penjualan/labarugi/persediaan/produksi/payroll) switch cleanly. rep-start/rep-end date inputs work, rep-sales-table renders, rep-sales-export-btn opens menu with rep-sales-export-excel item. rep-lr-bersih + rep-lr-pdf on Laba/Rugi. rep-stok-table/export and rep-prod-table/export present. Payroll tab: rep-payroll-periode set to 2026-07 shows Total gaji Rp 7.637.692 with Budi + Siti rows.",
+    "payroll": "Periode 2026-07 shows KPIs (karyawan=2, gaji periode Rp 653.846 for 2026-08 default then updates, belum=2). payroll-recap and payroll-table render Budi (SLP-0001) + Siti (SLP-0002) both Dibayar. payroll-view-<id> opens payroll-detail dialog with payroll-slip-pdf (PDF download triggers without JS error). Tested Bayar+Delete in 2026-06: payroll-generate created 2 Draft slips; payroll-bayar-<id> opens payroll-bayar-dialog with payroll-rekening select and payroll-bayar-submit; payroll-delete-<id> opens confirm and payroll-delete-confirm successfully deletes. All test slips cleaned up."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "test_credentials": "aguskimju@gmail.com / Admin@12345",
+  "seed_data_creation": "Temporarily generated 2 payroll slips for periode 2026-06 during Bayar/Delete testing; all cleaned up via delete flow.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Refactor is verified regression-clean. Note: a background 401 on some resource (likely notifications polling) appears in console but is not related to refactored pages and did not affect any functionality. Payroll 2026-07 has Budi + Siti both Dibayar (no Bayar/Delete buttons — expected). Use 2026-06 for testing Bayar/Delete flows."
+}
