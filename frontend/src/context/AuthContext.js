@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try { await api.post("/auth/logout"); } catch (e) { console.error("Logout gagal", e); }
+    try { await api.post("/auth/logout"); } catch { /* ignore logout errors */ }
     setUser(false);
   };
 

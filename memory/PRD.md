@@ -131,6 +131,12 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
   bila ada lembur), Export Excel/PDF (ExportButtons).
 - Tested: backend curl (matriks + ringkasan) PASS; screenshot halaman render OK sesuai data absensi.
 
+## Code Review Fixes (2026-08-01)
+- SalesPage.js: item baris form penjualan kini pakai key stabil (`_rid`) via helper newRow(), bukan index array — cegah potensi data ketukar saat hapus/tambah baris.
+- Hapus console.error sisa di lib/pdf.js (fallback logo) & context/AuthContext.js (logout) untuk production readiness.
+- CATATAN false-positive (tidak diubah, memang sudah benar): `is None`/`is not None` di db.py/stock_router/production_router (idiom Python benar); deps hook di AuthContext/RolesPage/ProductionPage/SalesPage (setter useState & konstanta modul memang stabil; deps debounce sengaja dibatasi); key index pada tabel READ-ONLY (preview/detail) aman; `mv`/`days_in_month` selalu ter-assign sebelum dipakai.
+- SENGAJA DILEWATI (risiko regresi pada logic bisnis yang sudah teruji, sesuai arahan): refactor kompleksitas dashboard()/process()/generate_payroll() & split komponen LaporanPage/PayrollPage/Dashboard.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

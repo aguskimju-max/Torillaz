@@ -22,10 +22,13 @@ import {
 import { rupiah, angka, tanggal } from "@/lib/format";
 import { invoicePDF, notaPDF, suratJalanPDF } from "@/lib/pdf";
 
+let _ridSeq = 0;
+const newRow = () => ({ _rid: ++_ridSeq, item_id: "", qty: "", harga: "", diskon: "" });
+
 const EMPTY = {
   pelanggan_id: "", gudang_id: "", tanggal: new Date().toISOString().slice(0, 10),
   tipe: "tunai", jatuh_tempo: "", pajak_id: "none", rekening_id: "none", metode: "",
-  catatan: "", items: [{ item_id: "", qty: "", harga: "", diskon: "" }],
+  catatan: "", items: [newRow()],
 };
 
 const STATUS_BADGE = {
@@ -72,7 +75,7 @@ export default function SalesPage() {
     }
     return { ...p, items };
   });
-  const addRow = () => setForm((p) => ({ ...p, items: [...p.items, { item_id: "", qty: "", harga: "", diskon: "" }] }));
+  const addRow = () => setForm((p) => ({ ...p, items: [...p.items, newRow()] }));
   const rmRow = (idx) => setForm((p) => ({ ...p, items: p.items.filter((_, i) => i !== idx) }));
 
   const validItems = form.items.filter((i) => i.item_id && Number(i.qty) > 0);
@@ -254,7 +257,7 @@ export default function SalesPage() {
               </div>
               <div className="space-y-2">
                 {form.items.map((it, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-1.5 items-center">
+                  <div key={it._rid} className="grid grid-cols-12 gap-1.5 items-center">
                     <div className="col-span-5">
                       <Select value={it.item_id} onValueChange={(v) => setItem(idx, "item_id", v)}>
                         <SelectTrigger data-testid={`sales-item-${idx}`} className="bg-white"><SelectValue placeholder="Produk..." /></SelectTrigger>
