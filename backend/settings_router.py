@@ -150,7 +150,7 @@ async def delete_role(name: str, user=Depends(require("pengaturan", "delete"))):
 # ---------------- RESET / HAPUS DATA DUMMY ----------------
 RESET_TARGETS = {
     "stok": {"label": "Stok & Pergerakan", "collections": ["stock_movements", "stock_balances"]},
-    "produksi": {"label": "Produksi & Resep (BOM)", "collections": ["production_orders", "boms"]},
+    "produksi": {"label": "Produksi & Resep (BOM)", "collections": ["production_orders", "master_bom"]},
     "penjualan": {"label": "Penjualan & Piutang", "collections": ["sales_orders", "customer_payments"]},
     "keuangan": {"label": "Kas & Bank", "collections": ["finance_transactions"]},
     "hr": {"label": "HR (Absensi, Kasbon, Payroll)", "collections": ["hr_attendance", "hr_kasbon", "hr_payroll"]},

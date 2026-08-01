@@ -111,6 +111,17 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
   pada recent movements. Penting untuk MongoDB Atlas (tiap query = round-trip jaringan).
 - Deployment checks: compilation/env/CORS/mongo semua OK.
 
+## Implemented (2026-08-01) — Reset Data Dummy + Rekap Absensi
+- **Reset / Hapus Data Dummy** (/pengaturan/reset, settings_router.py): endpoint GET /api/reset/summary
+  (hitung data per modul) & POST /api/reset (hapus per-modul atau "all"). Konfirmasi ketik "HAPUS".
+  Akun & role TIDAK ikut terhapus. Counter di-reset hanya pada full wipe. Master gudang/rak/metode
+  sengaja TIDAK ikut dihapus (keputusan user) — dianggap setup tetap.
+- **Bugfix**: target reset "produksi" sebelumnya menyasar koleksi `boms` (tidak ada); diperbaiki ke
+  `master_bom` agar BOM/Resep benar-benar terhapus. Terverifikasi (produksi count = 3).
+- **Rekap Absensi Bulanan** di PayrollPage: tabel rekap (Hadir/Izin/Sakit/Alpha/Libur/Lembur) per karyawan
+  dari GET /api/hr/attendance/recap, tampil sebelum tabel payroll agar bisa dicek sebelum generate.
+- Tested: backend curl (summary + recap + reset POST non-destruktif) PASS; screenshot kedua halaman render OK.
+
 ## Next Tasks
-- Mulai Fase 4 (Pembelian) yang terhubung ke stok penerimaan & hutang supplier.
-- Lanjut Fase 7 (Keuangan sederhana).
+- (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
+- (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
