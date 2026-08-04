@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQueries, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PackagePlus, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { rupiah, angka, tanggal } from "@/lib/format";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -23,6 +23,7 @@ export default function StokInputPage() {
   const [form, setForm] = useState(EMPTY);
   const [addOpen, setAddOpen] = useState(false);
   const [np, setNp] = useState(NEW_PRODUCT);
+  const [extraProducts, setExtraProducts] = useState([]);
   const change = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
   const [produk, gudangs, satuans] = useQueries({
@@ -32,7 +33,11 @@ export default function StokInputPage() {
       { queryKey: ["options", "satuan"], queryFn: async () => (await api.get("/master/satuan/options")).data },
     ],
   });
-  const products = produk.data || [];
+  const products = useMemo(() => {
+    const map = new Map();
+    [...(produk.data || []), ...extraProducts].forEach((p) => map.set(String(p.id), p));
+    return Array.from(map.values());
+  }, [produk.data, extraProducts]);
   const selected = products.find((p) => String(p.id) === String(form.item_id));
 
   const { data: stok, isLoading } = useQuery({
@@ -64,6 +69,7 @@ export default function StokInputPage() {
     },
     onSuccess: (created) => {
       toast.success("Produk baru ditambahkan");
+      setExtraProducts((prev) => [...prev, created]);
       qc.invalidateQueries({ queryKey: ["options", "barang_jadi"] });
       setForm((p) => ({ ...p, item_id: String(created.id) }));
       setAddOpen(false);
@@ -109,8 +115,12 @@ export default function StokInputPage() {
                 </button>
               )}
             </div>
-            <Select value={form.item_id || ""} onValueChange={(v) => change("item_id", v)}>
-              <SelectTrigger data-testid="stok-produk" className="bg-white"><SelectValue placeholder="Pilih produk..." /></SelectTrigger>
+            <Select value={form.item_id || ""} onValueChange={(v) => { if (v) change("item_id", v); }}>
+              <SelectTrigger data-testid="stok-produk" className="bg-white">
+                <span className={selected ? "line-clamp-1" : "text-muted-foreground"}>
+                  {selected ? `${selected.nama} (${selected.kode})` : "Pilih produk..."}
+                </span>
+              </SelectTrigger>
               <SelectContent className="bg-white max-h-64">
                 {products.map((p) => <SelectItem key={p.id} value={String(p.id)}>{p.nama} ({p.kode})</SelectItem>)}
                 {products.length === 0 && <div className="px-3 py-2 text-sm text-slate-400">Belum ada produk</div>}
@@ -158,7 +168,9 @@ export default function StokInputPage() {
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="bg-white max-w-sm" data-testid="stok-add-product-dialog">
-          <DialogHeader><DialogTitle className="font-heading">Tambah Produk Baru</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-heading">Tambah Produk Baru</DialogTitle>
+            <DialogDescription>Produk baru akan langsung terpilih untuk input stok.</DialogDescription>
+          </DialogHeader>
           <div className="space-y-3 py-1">
             <div>
               <Label className="mb-1.5 block">Nama Produk <span className="text-rose-500">*</span></Label>

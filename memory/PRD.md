@@ -149,6 +149,14 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Fix: tambah endpoint non-error `GET /api/auth/session` (Depends optional_current_user) yang balas 200 `{authenticated, user}`; AuthContext.fetchMe kini pakai `/auth/session`. Route bisnis terproteksi TETAP 401 (keamanan utuh). `/auth/me` dibiarkan.
 - Tested: curl (unauth 200 authenticated:false, auth 200 + user), screenshot reproduksi login→logout = 0 error 4xx di console. Login/logout tetap normal.
 
+## Penyederhanaan Gudang & Stok (2026-08-04)
+- Tujuan user: pemakaian lebih sederhana karena menu Gudang & Stok terlalu ribet. Dashboard tetap, modul lain tetap ada.
+- Menu "Gudang & Stok" disederhanakan → **Input Stok**, **Stok Saat Ini**, **Riwayat Stok**. Operasi lanjutan (Penerimaan, Pengeluaran, Penyesuaian, Transfer, Opname) dipindah ke grup terpisah **"Stok Lanjutan"** (tidak dihapus, route tetap).
+- Halaman baru **Input Stok** (`/stok/input`, StokInputPage.js): form ringkas Produk + Gudang + Tanggal Produksi + Kadaluarsa (opsional) + Jumlah. Tombol **"Produk Baru"** untuk menambah barang jadi langsung (nama, satuan, harga jual, harga pokok). Tabel stok produk terkini di sampingnya.
+- Backend: endpoint baru `POST /api/stock/simple-in` (barang jadi; batch = tanggal produksi tiap lot; harga otomatis dari harga_pokok produk). `apply_delta()` & `record_movement()` kini menyimpan `tanggal_produksi`; `list_balances` mengembalikan `tanggal_produksi`.
+- Penjualan tetap seperti sekarang & tetap mengurangi stok otomatis (FEFO saat KIRIM) — regresi terverifikasi (stok 45→43).
+- Bug Radix Select (nilai ke-reset "" untuk item yang baru dibuat karena belum ter-register) diperbaiki: label trigger dirender dari state (`selected`) + `onValueChange` mengabaikan reset kosong. Terverifikasi: buat produk inline → langsung terpilih → input stok sukses → muncul di tabel.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
