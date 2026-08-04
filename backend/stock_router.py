@@ -34,7 +34,7 @@ async def _balance_key(item_type, item_id, gudang_id, batch):
 
 
 async def apply_delta(item_type, item_id, gudang_id, batch, expired_date,
-                      delta_qty, in_price=None, allow_negative=False):
+                      delta_qty, in_price=None, allow_negative=False, tanggal_produksi=None):
     key = await _balance_key(item_type, item_id, gudang_id, batch)
     bal = await db.stock_balances.find_one(key)
     cur_qty = bal["qty"] if bal else 0
@@ -48,18 +48,17 @@ async def apply_delta(item_type, item_id, gudang_id, batch, expired_date,
         new_avg = round(total_val / new_qty, 4) if new_qty > 0 else in_price
     else:
         new_avg = cur_avg
-    await db.stock_balances.update_one(
-        key,
-        {"$set": {"qty": new_qty, "avg_price": new_avg, "expired_date": expired_date,
-                  "updated_at": now_iso()}},
-        upsert=True,
-    )
+    setdoc = {"qty": new_qty, "avg_price": new_avg, "expired_date": expired_date,
+              "updated_at": now_iso()}
+    if tanggal_produksi is not None:
+        setdoc["tanggal_produksi"] = tanggal_produksi
+    await db.stock_balances.update_one(key, {"$set": setdoc}, upsert=True)
     return cur_qty, new_qty, new_avg
 
 
 async def record_movement(no, tipe, item, item_type, item_id, gudang_id, gudang_nama,
                           batch, expired_date, qty, harga, saldo_akhir, keterangan, user,
-                          ref=None):
+                          ref=None, tanggal_produksi=None):
     doc = {
         "no_transaksi": no,
         "tipe": tipe,
@@ -72,6 +71,7 @@ async def record_movement(no, tipe, item, item_type, item_id, gudang_id, gudang_
         "gudang_nama": gudang_nama,
         "batch": batch or "-",
         "expired_date": expired_date,
+        "tanggal_produksi": tanggal_produksi,
         "qty": qty,
         "harga_satuan": harga or 0,
         "total": round((harga or 0) * abs(qty), 2),
@@ -137,6 +137,37 @@ async def consume_stock_fifo(item_type, item_id, gudang_id, qty, item, gudang_na
                               keterangan, user, ref=no)
         remaining -= take
     return round(cost_total, 2)
+
+
+@router.post("/simple-in")
+async def simple_stock_in(payload: dict = Body(...), user=Depends(require("gudang", "add"))):
+    """Simplified stock-in for finished goods: product + production date + qty + warehouse."""
+    item_id = payload.get("item_id")
+    gudang_id = payload.get("gudang_id")
+    tanggal_produksi = payload.get("tanggal_produksi")
+    expired_date = payload.get("expired_date") or None
+    qty = float(payload.get("qty") or 0)
+    if not item_id or not gudang_id:
+        raise HTTPException(status_code=400, detail="Produk dan gudang wajib diisi")
+    if not tanggal_produksi:
+        raise HTTPException(status_code=400, detail="Tanggal produksi wajib diisi")
+    if qty <= 0:
+        raise HTTPException(status_code=400, detail="Jumlah harus lebih dari 0")
+    item = await get_item("barang_jadi", item_id)
+    gnama = await gudang_name(gudang_id)
+    # group stock per production date so each production lot is tracked as its own batch
+    batch = tanggal_produksi
+    harga = float(item.get("harga_pokok") or item.get("hpp") or 0)
+    _, new_qty, _ = await apply_delta("barang_jadi", item_id, gudang_id, batch, expired_date,
+                                      qty, harga, tanggal_produksi=tanggal_produksi)
+    no = await get_next_code(TIPE_PREFIX["penerimaan"])
+    ket = f"Input stok · produksi {tanggal_produksi}"
+    mv = await record_movement(no, "penerimaan", item, "barang_jadi", item_id, gudang_id,
+                               gnama, batch, expired_date, qty, harga, new_qty, ket, user,
+                               tanggal_produksi=tanggal_produksi)
+    await log_audit(user, "create", "gudang", "stock_movement", no,
+                    f"Input stok {item.get('nama')} qty {qty} (produksi {tanggal_produksi})")
+    return serialize(mv)
 
 
 @router.post("/movement")
@@ -277,6 +308,7 @@ async def list_balances(item_type: Optional[str] = None, gudang_id: Optional[str
             "satuan": item.get("satuan_nama") or item.get("satuan"),
             "gudang_id": b.get("gudang_id"), "gudang_nama": g.get("nama") if g else "-",
             "batch": b.get("batch"), "expired_date": b.get("expired_date"),
+            "tanggal_produksi": b.get("tanggal_produksi"),
             "qty": b.get("qty", 0), "avg_price": b.get("avg_price", 0),
             "nilai": round(b.get("qty", 0) * b.get("avg_price", 0), 2),
             "stok_min": stok_min, "stok_max": float(item.get("stok_max") or 0),

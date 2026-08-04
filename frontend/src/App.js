@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import MasterPage from "@/pages/master/MasterPage";
 import StockOperationPage from "@/pages/stock/StockOperationPage";
 import StokListPage from "@/pages/stock/StokListPage";
+import StokInputPage from "@/pages/stock/StokInputPage";
 import KartuStokPage from "@/pages/stock/KartuStokPage";
 import UsersPage from "@/pages/settings/UsersPage";
 import RolesPage from "@/pages/settings/RolesPage";
@@ -74,6 +75,7 @@ export default function App() {
             <Route path="/" element={<Guard module="dashboard"><Dashboard /></Guard>} />
             <Route path="/master/:entity" element={<Guard module="master"><MasterPage /></Guard>} />
             <Route path="/stok" element={<Guard module="gudang"><StokListPage /></Guard>} />
+            <Route path="/stok/input" element={<Guard module="gudang"><StokInputPage /></Guard>} />
             <Route path="/stok/penerimaan" element={<Guard module="gudang"><StockOperationPage mode="penerimaan" /></Guard>} />
             <Route path="/stok/pengeluaran" element={<Guard module="gudang"><StockOperationPage mode="pengeluaran" /></Guard>} />
             <Route path="/stok/penyesuaian" element={<Guard module="gudang"><StockOperationPage mode="penyesuaian" /></Guard>} />
