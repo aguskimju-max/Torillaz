@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, Boxes, Wallet, AlertTriangle } from "lucide-react";
 import * as XLSX from "xlsx";
 import api from "@/lib/api";
 import PageHeader from "@/components/common/PageHeader";
 import DataTable from "@/components/common/DataTable";
+import KpiCard from "@/components/common/KpiCard";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,6 +32,8 @@ export default function StokListPage() {
     queryFn: async () => (await api.get("/stock/summary", { params })).data,
   });
   const items = data?.items || [];
+  const grandTotal = items.reduce((a, r) => a + (r.total_nilai || 0), 0);
+  const lowCount = items.filter((r) => r.is_low).length;
 
   const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ["stock-detail", detail?.item_id],
@@ -75,6 +78,12 @@ export default function StokListPage() {
           <Download className="h-4 w-4 mr-1.5" /> Export Excel
         </Button>
       </PageHeader>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <KpiCard testId="stok-total-nilai" icon={Wallet} accent="emerald" label="Total Nilai Persediaan" value={rupiah(grandTotal)} sub="Seluruh gudang & batch" />
+        <KpiCard testId="stok-total-item" icon={Boxes} accent="sky" label="Jumlah Item" value={angka(items.length)} sub="Item dengan stok tercatat" />
+        <KpiCard testId="stok-low-count" icon={AlertTriangle} accent={lowCount ? "rose" : "slate"} label="Item Stok Minimum" value={angka(lowCount)} sub="Perlu produksi/restock" />
+      </div>
 
       <DataTable
         testId="stok-table"

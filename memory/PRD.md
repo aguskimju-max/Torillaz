@@ -191,6 +191,10 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Filter (jenis item, stok minimum) + search + Export Excel (rekap) dipertahankan.
 - Terverifikasi (curl + screenshot): rekap 9 item benar; detail per batch cocok (mis. total 6 = 3+3).
 
+## Ringkasan Grand-Total di Stok Saat Ini (2026-08-21)
+- Ditambahkan 3 kartu KPI di atas tabel rekap Stok Saat Ini: **Total Nilai Persediaan** (grand-total nilai seluruh stok), **Jumlah Item**, **Item Stok Minimum** — dihitung dari data `/stock/summary`.
+- Terverifikasi (screenshot): Total Nilai Rp 14.902.143, 9 item, 1 stok minimum.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
