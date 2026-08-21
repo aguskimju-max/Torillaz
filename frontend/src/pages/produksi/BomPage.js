@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { rupiah, angka } from "@/lib/format";
 
-const EMPTY = { barang_jadi_id: "", output_qty: 1, items: [{ item_id: "", qty: "" }], biaya_tk: "", biaya_overhead: "", is_active: true };
+let _bomRid = 0;
+const newRow = () => ({ _rid: ++_bomRid, item_id: "", qty: "" });
+const EMPTY = { barang_jadi_id: "", output_qty: 1, items: [newRow()], biaya_tk: "", biaya_overhead: "", is_active: true };
 
 export default function BomPage() {
   const { hasPerm } = useAuth();
@@ -42,7 +44,7 @@ export default function BomPage() {
     if (open) {
       setForm(editing ? {
         barang_jadi_id: editing.barang_jadi_id, output_qty: editing.output_qty,
-        items: (editing.items || []).map((i) => ({ item_id: i.item_id, qty: i.qty })),
+        items: (editing.items || []).map((i) => ({ _rid: ++_bomRid, item_id: i.item_id, qty: i.qty })),
         biaya_tk: editing.biaya_tk, biaya_overhead: editing.biaya_overhead, is_active: editing.is_active,
       } : EMPTY);
     }
@@ -50,7 +52,7 @@ export default function BomPage() {
 
   const saveMut = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, items: form.items.filter((i) => i.item_id && Number(i.qty) > 0) };
+      const payload = { ...form, items: form.items.filter((i) => i.item_id && Number(i.qty) > 0).map(({ _rid, ...rest }) => rest) };
       if (editing) return (await api.put(`/production/bom/${editing.id}`, payload)).data;
       return (await api.post("/production/bom", payload)).data;
     },
@@ -64,7 +66,7 @@ export default function BomPage() {
   });
 
   const setItem = (idx, key, val) => setForm((p) => { const items = [...p.items]; items[idx] = { ...items[idx], [key]: val }; return { ...p, items }; });
-  const addRow = () => setForm((p) => ({ ...p, items: [...p.items, { item_id: "", qty: "" }] }));
+  const addRow = () => setForm((p) => ({ ...p, items: [...p.items, newRow()] }));
   const rmRow = (idx) => setForm((p) => ({ ...p, items: p.items.filter((_, i) => i !== idx) }));
 
   const submit = () => {
@@ -126,7 +128,7 @@ export default function BomPage() {
               </div>
               <div className="space-y-2">
                 {form.items.map((it, idx) => (
-                  <div key={idx} className="flex gap-2 items-center">
+                  <div key={it._rid} className="flex gap-2 items-center">
                     <Select value={it.item_id} onValueChange={(v) => setItem(idx, "item_id", v)}>
                       <SelectTrigger data-testid={`bom-item-${idx}`} className="bg-white flex-1"><SelectValue placeholder="Bahan baku..." /></SelectTrigger>
                       <SelectContent className="bg-white max-h-64">
@@ -134,7 +136,7 @@ export default function BomPage() {
                       </SelectContent>
                     </Select>
                     <Input data-testid={`bom-qty-${idx}`} type="number" step="any" className="w-24" placeholder="Qty" value={it.qty} onChange={(e) => setItem(idx, "qty", e.target.value)} />
-                    <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => rmRow(idx)}><X className="h-4 w-4 text-rose-500" /></Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-9 w-9" data-testid={`bom-remove-${idx}`} onClick={() => rmRow(idx)}><X className="h-4 w-4 text-rose-500" /></Button>
                   </div>
                 ))}
               </div>

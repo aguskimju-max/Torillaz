@@ -188,6 +188,7 @@ async def create_movement(payload: dict = Body(...), user=Depends(require("gudan
         raise HTTPException(status_code=400, detail="Item dan gudang wajib diisi")
     item = await get_item(item_type, item_id)
     gnama = await gudang_name(gudang_id)
+    mv = None
 
     if tipe == "penerimaan":
         if qty <= 0:

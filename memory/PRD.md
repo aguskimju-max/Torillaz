@@ -177,6 +177,13 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - DISEMBUNYIKAN dari sidebar (route & data tetap, reversible): grup **Stok Lanjutan** (Penerimaan, Pengeluaran, Penyesuaian, Transfer, Opname) dan modul lama **Produksi (Resep/BOM + Produksi & HPP)**.
 - Terverifikasi (screenshot + console): sidebar tidak lagi menampilkan Stok Lanjutan / Resep-BOM / Produksi & HPP; menampilkan Produksi + Stok Saat Ini + Riwayat Stok; halaman Produksi render benar.
 
+## Code Review Fixes Round 2 (2026-08-21)
+- Backend `stock_router.create_movement`: init `mv = None` (defensif; semua cabang valid sudah assign mv). Tidak mengubah perilaku.
+- Frontend `BomPage.js`: item baris resep pakai key stabil (`_rid`) via newRow(), bukan index array — cegah nilai baris tertukar saat hapus baris (pola sama seperti SalesPage). `_rid` di-strip sebelum kirim ke backend. Tambah data-testid `bom-remove-<idx>`.
+- False-positive (tidak diubah, memang benar): `is None`/`is not None` (db.py, stock_router, production_router); deps hook (setter useState/konstanta modul/debounce stabil); key index pada tabel READ-ONLY & skeleton loader; `days_in_month` selalu ter-assign; catch logout sengaja senyap.
+- Sengaja dilewati (risiko regresi pada logika teruji): refactor kompleksitas backend dashboard()/process()/generate_payroll() & pemecahan komponen besar SalesPage/KasBankPage.
+- Terverifikasi (testing_agent iteration_7): backend stok 7/7 PASS; BOM hapus baris tengah → nilai baris lain tetap benar (qty 11 & 33); save+edit OK; penjualan tetap mengurangi stok.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
