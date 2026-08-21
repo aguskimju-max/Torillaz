@@ -184,6 +184,13 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Sengaja dilewati (risiko regresi pada logika teruji): refactor kompleksitas backend dashboard()/process()/generate_payroll() & pemecahan komponen besar SalesPage/KasBankPage.
 - Terverifikasi (testing_agent iteration_7): backend stok 7/7 PASS; BOM hapus baris tengah → nilai baris lain tetap benar (qty 11 & 33); save+edit OK; penjualan tetap mengurangi stok.
 
+## Stok Saat Ini: Rekap Total + Detail (2026-08-21)
+- Halaman **Stok Saat Ini** kini menampilkan **rekap total per item** (dijumlahkan lintas gudang & batch): Kode, Nama Item, Total Qty, jumlah Lokasi/Batch, Nilai Total, Status (Aman/Stok Minimum/Negatif).
+- Tombol **Detail** per item → dialog rincian lengkap per gudang & batch (Gudang, Batch/Tgl Produksi, Kadaluarsa, Qty, Harga Rata², Nilai) + baris Total.
+- Backend baru: `GET /api/stock/summary` (agregasi per item_id) + tambah filter `item_id` di `GET /api/stock/balances` untuk drill-down detail.
+- Filter (jenis item, stok minimum) + search + Export Excel (rekap) dipertahankan.
+- Terverifikasi (curl + screenshot): rekap 9 item benar; detail per batch cocok (mis. total 6 = 3+3).
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

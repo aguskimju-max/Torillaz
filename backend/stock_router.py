@@ -285,6 +285,7 @@ async def list_movements(item_type: Optional[str] = None, item_id: Optional[str]
 
 @router.get("/balances")
 async def list_balances(item_type: Optional[str] = None, gudang_id: Optional[str] = None,
+                        item_id: Optional[str] = None,
                         low_only: Optional[str] = None, q: Optional[str] = None,
                         page: int = 1, limit: int = 50,
                         user=Depends(require("gudang", "view"))):
@@ -293,6 +294,8 @@ async def list_balances(item_type: Optional[str] = None, gudang_id: Optional[str
         flt["item_type"] = item_type
     if gudang_id:
         flt["gudang_id"] = gudang_id
+    if item_id:
+        flt["item_id"] = item_id
     cursor = db.stock_balances.find(flt)
     rows = []
     async for b in cursor:
@@ -322,6 +325,46 @@ async def list_balances(item_type: Optional[str] = None, gudang_id: Optional[str
     total = len(rows)
     start = (max(1, page) - 1) * limit
     return {"items": rows[start:start + limit], "total": total, "page": page, "limit": limit}
+
+
+@router.get("/summary")
+async def stock_summary(item_type: Optional[str] = None, low_only: Optional[str] = None,
+                        q: Optional[str] = None, user=Depends(require("gudang", "view"))):
+    """Rekap total stok per item (dijumlahkan lintas gudang & batch)."""
+    flt = {}
+    if item_type:
+        flt["item_type"] = item_type
+    agg = {}
+    skip = set()
+    async for b in db.stock_balances.find(flt):
+        key = (b["item_type"], b["item_id"])
+        if key in skip:
+            continue
+        entry = agg.get(key)
+        if not entry:
+            item = await db[ITEM_COLL[b["item_type"]]].find_one({"_id": oid(b["item_id"])})
+            if not item or (q and q.lower() not in (item.get("nama", "").lower() + item.get("kode", "").lower())):
+                skip.add(key)
+                continue
+            entry = {
+                "item_id": b["item_id"], "item_type": b["item_type"],
+                "item_kode": item.get("kode"), "item_nama": item.get("nama"),
+                "satuan": item.get("satuan_nama") or item.get("satuan"),
+                "stok_min": float(item.get("stok_min") or 0),
+                "total_qty": 0.0, "total_nilai": 0.0, "lokasi": 0,
+            }
+            agg[key] = entry
+        qty = b.get("qty", 0)
+        entry["total_qty"] = round(entry["total_qty"] + qty, 4)
+        entry["total_nilai"] = round(entry["total_nilai"] + qty * b.get("avg_price", 0), 2)
+        entry["lokasi"] += 1
+    rows = list(agg.values())
+    for r in rows:
+        r["is_low"] = r["total_qty"] <= r["stok_min"]
+    if low_only == "true":
+        rows = [r for r in rows if r["is_low"]]
+    rows.sort(key=lambda r: r["item_nama"])
+    return {"items": rows, "total": len(rows)}
 
 
 @router.get("/kartu")
