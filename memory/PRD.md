@@ -163,6 +163,13 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Tabel daftar pelanggan menampilkan kolom Toko/Stand + kolom **Lokasi** berisi link **"Arah"** ke Google Maps directions.
 - Backend tidak berubah (master generic menyimpan field `nama_toko`, `latitude`, `longitude` via clean_payload). Terverifikasi: create pelanggan menyimpan toko + koordinat; form & list render + link maps benar.
 
+## Peta Semua Pelanggan (2026-08-21)
+- Menu baru **Peta Pelanggan** (`/peta-pelanggan`, di grup Master Data setelah Pelanggan).
+- Peta interaktif memakai **Leaflet + OpenStreetMap** (tanpa API key/biaya). Setiap pelanggan berkoordinat tampil sebagai pin; auto fit-bounds ke semua pin.
+- Klik pin → popup berisi nama toko, nama pelanggan, telepon, alamat, dan tautan **"Buka Arah"** (Google Maps directions). Sidebar "Daftar Toko" berisi semua pelanggan + link "Arah". Indikator "N dari M pelanggan berkoordinat".
+- Dependency baru: `leaflet@1.9.4`, `react-leaflet@5.0.0` (React 19 compatible). Ikon marker di-load dari CDN cloudflare (hindari isu bundler PNG).
+- Data uji: 3 pelanggan diberi koordinat (Jakarta x2, Surabaya). Terverifikasi: 3 pin render, popup + directions link benar.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

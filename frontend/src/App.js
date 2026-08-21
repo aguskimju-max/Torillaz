@@ -8,6 +8,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import MasterPage from "@/pages/master/MasterPage";
+import PelangganMapPage from "@/pages/master/PelangganMapPage";
 import StockOperationPage from "@/pages/stock/StockOperationPage";
 import StokListPage from "@/pages/stock/StokListPage";
 import StokInputPage from "@/pages/stock/StokInputPage";
@@ -74,6 +75,7 @@ export default function App() {
           <Route element={<Protected><AppLayout /></Protected>}>
             <Route path="/" element={<Guard module="dashboard"><Dashboard /></Guard>} />
             <Route path="/master/:entity" element={<Guard module="master"><MasterPage /></Guard>} />
+            <Route path="/peta-pelanggan" element={<Guard module="master"><PelangganMapPage /></Guard>} />
             <Route path="/stok" element={<Guard module="gudang"><StokListPage /></Guard>} />
             <Route path="/stok/input" element={<Guard module="gudang"><StokInputPage /></Guard>} />
             <Route path="/stok/penerimaan" element={<Guard module="gudang"><StockOperationPage mode="penerimaan" /></Guard>} />

@@ -27,6 +27,7 @@ export const NAV = [
       { to: "/master/merek", label: "Merek", icon: Bookmark, module: "master" },
       { to: "/master/supplier", label: "Supplier", icon: Truck, module: "master" },
       { to: "/master/pelanggan", label: "Pelanggan", icon: Users, module: "master" },
+      { to: "/peta-pelanggan", label: "Peta Pelanggan", icon: MapPin, module: "master" },
       { to: "/master/bahan_baku", label: "Bahan Baku", icon: Wheat, module: "master" },
       { to: "/master/barang_jadi", label: "Barang Jadi", icon: Package, module: "master" },
       { to: "/master/karyawan", label: "Karyawan", icon: UserSquare2, module: "master" },
