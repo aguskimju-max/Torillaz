@@ -75,12 +75,14 @@ export const MASTER_CONFIGS = {
   },
   pelanggan: {
     title: "Pelanggan",
-    columns: [{ key: "kode", label: "Kode" }, { key: "nama", label: "Nama" }, { key: "telepon", label: "Telepon" }, { key: "kategori", label: "Kategori" }, { key: "term", label: "Term (hari)" }, STD],
+    columns: [{ key: "kode", label: "Kode" }, { key: "nama", label: "Nama" }, { key: "nama_toko", label: "Toko/Stand" }, { key: "telepon", label: "Telepon" }, { key: "kategori", label: "Kategori" }, { key: "latitude", label: "Lokasi", fmt: "maps" }, STD],
     fields: [
       { name: "nama", label: "Nama Pelanggan", type: "text", required: true },
+      { name: "nama_toko", label: "Nama Toko / Stand", type: "text", placeholder: "cth: Toko Berkah / Stand A12" },
       { name: "telepon", label: "Telepon", type: "text" },
       { name: "email", label: "Email", type: "text" },
       { name: "alamat", label: "Alamat", type: "textarea" },
+      { name: "lokasi", label: "Koordinat Lokasi (GPS)", type: "geo" },
       { name: "kategori", label: "Kategori", type: "select", options: [{ value: "Retail", label: "Retail" }, { value: "Grosir", label: "Grosir" }, { value: "Distributor", label: "Distributor" }] },
       { name: "term", label: "Term Pembayaran (hari)", type: "number" },
     ],

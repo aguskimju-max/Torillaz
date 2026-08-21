@@ -157,6 +157,12 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Penjualan tetap seperti sekarang & tetap mengurangi stok otomatis (FEFO saat KIRIM) — regresi terverifikasi (stok 45→43).
 - Bug Radix Select (nilai ke-reset "" untuk item yang baru dibuat karena belum ter-register) diperbaiki: label trigger dirender dari state (`selected`) + `onValueChange` mengabaikan reset kosong. Terverifikasi: buat produk inline → langsung terpilih → input stok sukses → muncul di tabel.
 
+## Pelanggan: Nama Toko/Stand + Koordinat GPS (2026-08-21)
+- Form pelanggan (master) kini punya field **Nama Toko / Stand** dan **Koordinat Lokasi (GPS)**.
+- Field GPS baru (type `geo` di CrudDrawer): tombol **"Ambil Lokasi Sekarang"** memakai Geolocation API HP (butuh izin + HTTPS) untuk isi latitude/longitude otomatis; bisa juga input manual; ada tautan **"Buka Arah (Google Maps)"** (mode directions `maps/dir/?api=1&destination=lat,lng`).
+- Tabel daftar pelanggan menampilkan kolom Toko/Stand + kolom **Lokasi** berisi link **"Arah"** ke Google Maps directions.
+- Backend tidak berubah (master generic menyimpan field `nama_toko`, `latitude`, `longitude` via clean_payload). Terverifikasi: create pelanggan menyimpan toko + koordinat; form & list render + link maps benar.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

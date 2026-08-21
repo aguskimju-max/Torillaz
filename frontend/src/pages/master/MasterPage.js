@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient, useQueries } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -109,6 +109,9 @@ export default function MasterPage() {
           ? <StatusBadge variant="neutral">Nonaktif</StatusBadge>
           : <StatusBadge variant="success">Aktif</StatusBadge>;
         if (c.fmt === "ref") return resolveRef(c.refSource, v);
+        if (c.fmt === "maps") return (row.latitude != null && row.longitude != null && row.latitude !== "" && row.longitude !== "")
+          ? <a href={`https://www.google.com/maps/dir/?api=1&destination=${row.latitude},${row.longitude}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700"><MapPin className="h-3.5 w-3.5" /> Arah</a>
+          : "-";
         return v ?? "-";
       },
     })),
