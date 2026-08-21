@@ -170,6 +170,13 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Dependency baru: `leaflet@1.9.4`, `react-leaflet@5.0.0` (React 19 compatible). Ikon marker di-load dari CDN cloudflare (hindari isu bundler PNG).
 - Data uji: 3 pelanggan diberi koordinat (Jakarta x2, Surabaya). Terverifikasi: 3 pin render, popup + directions link benar.
 
+## Sederhanakan Keluar-Masuk Barang (2026-08-21)
+- **Stok masuk** hanya lewat menu **Produksi** (halaman Input Stok di-rename → judul "Produksi", "Form Produksi", tombol "Simpan Produksi", toast "Produksi tercatat, stok bertambah"). Route tetap `/stok/input`.
+- **Stok keluar** otomatis dari **Penjualan** (FEFO saat kirim — sudah ada, tidak diubah).
+- Menu **Gudang & Stok** kini hanya: Produksi · Stok Saat Ini · Riwayat Stok.
+- DISEMBUNYIKAN dari sidebar (route & data tetap, reversible): grup **Stok Lanjutan** (Penerimaan, Pengeluaran, Penyesuaian, Transfer, Opname) dan modul lama **Produksi (Resep/BOM + Produksi & HPP)**.
+- Terverifikasi (screenshot + console): sidebar tidak lagi menampilkan Stok Lanjutan / Resep-BOM / Produksi & HPP; menampilkan Produksi + Stok Saat Ini + Riwayat Stok; halaman Produksi render benar.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

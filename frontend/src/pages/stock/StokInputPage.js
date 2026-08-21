@@ -52,7 +52,7 @@ export default function StokInputPage() {
       qty: Number(form.qty),
     })).data,
     onSuccess: () => {
-      toast.success("Stok berhasil ditambahkan");
+      toast.success("Produksi tercatat, stok bertambah");
       ["balances", "dashboard", "notifications"].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
       setForm((p) => ({ ...EMPTY, gudang_id: p.gudang_id, tanggal_produksi: p.tanggal_produksi }));
     },
@@ -97,13 +97,13 @@ export default function StokInputPage() {
 
   return (
     <div>
-      <PageHeader title="Input Stok" subtitle="Tambah stok produk cukup dengan tanggal produksi & jumlah" />
+      <PageHeader title="Produksi" subtitle="Catat hasil produksi (produk + tanggal produksi + jumlah) — stok otomatis bertambah" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <form onSubmit={submit} data-testid="stok-input-form" className="lg:col-span-1 bg-white rounded-lg border border-slate-200 shadow-sm p-5 space-y-4 h-fit">
           <div className="flex items-center gap-2 text-emerald-700">
             <PackagePlus className="h-5 w-5" />
-            <span className="font-heading font-semibold">Form Input Stok</span>
+            <span className="font-heading font-semibold">Form Produksi</span>
           </div>
 
           <div>
@@ -156,7 +156,7 @@ export default function StokInputPage() {
           </div>
 
           <Button data-testid="stok-submit" type="submit" disabled={inMut.isPending} className="w-full bg-emerald-600 hover:bg-emerald-700">
-            {inMut.isPending ? "Menyimpan..." : "Tambah Stok"}
+            {inMut.isPending ? "Menyimpan..." : "Simpan Produksi"}
           </Button>
         </form>
 

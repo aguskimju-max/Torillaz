@@ -44,30 +44,9 @@ export const NAV = [
     icon: Warehouse,
     module: "gudang",
     items: [
-      { to: "/stok/input", label: "Input Stok", icon: PackagePlus, module: "gudang" },
+      { to: "/stok/input", label: "Produksi", icon: Factory, module: "gudang" },
       { to: "/stok", label: "Stok Saat Ini", icon: Boxes, module: "gudang" },
       { to: "/stok/kartu", label: "Riwayat Stok", icon: BookOpen, module: "gudang" },
-    ],
-  },
-  {
-    label: "Stok Lanjutan",
-    icon: SlidersHorizontal,
-    module: "gudang",
-    items: [
-      { to: "/stok/penerimaan", label: "Penerimaan", icon: PackagePlus, module: "gudang" },
-      { to: "/stok/pengeluaran", label: "Pengeluaran", icon: PackageMinus, module: "gudang" },
-      { to: "/stok/penyesuaian", label: "Penyesuaian", icon: SlidersHorizontal, module: "gudang" },
-      { to: "/stok/transfer", label: "Transfer Gudang", icon: ArrowLeftRight, module: "gudang" },
-      { to: "/stok/opname", label: "Stock Opname", icon: ClipboardCheck, module: "gudang" },
-    ],
-  },
-  {
-    label: "Produksi",
-    icon: Factory,
-    module: "produksi",
-    items: [
-      { to: "/produksi/bom", label: "Resep / BOM", icon: ChefHat, module: "produksi" },
-      { to: "/produksi/order", label: "Produksi & HPP", icon: Factory, module: "produksi" },
     ],
   },
   {
