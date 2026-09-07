@@ -6,8 +6,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+
+let _plRid = 0;
+
+function PriceListField({ name, value, onChange }) {
+  const rows = Array.isArray(value) ? value : [];
+  const update = (i, k, v) => onChange(name, rows.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  const add = () => onChange(name, [...rows, { _rid: ++_plRid, label: "", harga: "" }]);
+  const remove = (i) => onChange(name, rows.filter((_, j) => j !== i));
+  return (
+    <div className="space-y-2">
+      {rows.map((r, i) => (
+        <div key={r._rid ?? i} className="grid grid-cols-12 gap-1.5 items-center">
+          <Input data-testid={`pricelist-label-${i}`} className="col-span-6" placeholder="Nama harga (cth: Grosir)"
+            value={r.label ?? ""} onChange={(e) => update(i, "label", e.target.value)} />
+          <Input data-testid={`pricelist-harga-${i}`} className="col-span-5" type="number" placeholder="Harga"
+            value={r.harga ?? ""} onChange={(e) => update(i, "harga", e.target.value === "" ? "" : Number(e.target.value))} />
+          <Button type="button" variant="ghost" size="icon" className="col-span-1 h-9 w-9"
+            data-testid={`pricelist-remove-${i}`} onClick={() => remove(i)}>
+            <X className="h-4 w-4 text-rose-500" />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" data-testid={`pricelist-add-${name}`} onClick={add}>
+        <Plus className="h-3.5 w-3.5 mr-1" /> Tambah Pilihan Harga
+      </Button>
+      <p className="text-xs text-slate-400">Pilihan harga tambahan selain harga standar. Saat penjualan, harga dipilih dari daftar ini.</p>
+    </div>
+  );
+}
 
 function GeoField({ form, onChange }) {
   const [loading, setLoading] = useState(false);
@@ -103,6 +132,9 @@ export default function CrudDrawer({ open, onClose, title, fields, initial, onSu
         if (f.type === "geo") {
           base.latitude = initial?.latitude ?? "";
           base.longitude = initial?.longitude ?? "";
+        } else if (f.type === "pricelist") {
+          base[f.name] = (Array.isArray(initial?.[f.name]) ? initial[f.name] : [])
+            .map((r) => ({ _rid: ++_plRid, label: r.label ?? "", harga: r.harga ?? "" }));
         } else {
           base[f.name] = initial?.[f.name] ?? (f.type === "switch" ? true : "");
         }
@@ -122,10 +154,27 @@ export default function CrudDrawer({ open, onClose, title, fields, initial, onSu
         setError(`${f.label} wajib diisi`);
         return;
       }
+      if (f.type === "pricelist") {
+        for (const r of form[f.name] || []) {
+          const hasLabel = (r.label || "").trim() !== "";
+          const hasHarga = r.harga !== "" && r.harga != null;
+          if (hasLabel !== hasHarga) {
+            setError(`${f.label}: setiap baris harus punya nama harga dan nominal`);
+            return;
+          }
+        }
+      }
     }
     try {
       setError("");
       const payload = { ...form };
+      fields.forEach((f) => {
+        if (f.type === "pricelist") {
+          payload[f.name] = (form[f.name] || [])
+            .filter((r) => (r.label || "").trim() !== "" && r.harga !== "" && r.harga != null)
+            .map((r) => ({ label: r.label.trim(), harga: Number(r.harga) }));
+        }
+      });
       if (payload.latitude === "") payload.latitude = null;
       if (payload.longitude === "") payload.longitude = null;
       await onSubmit(payload);
@@ -148,7 +197,9 @@ export default function CrudDrawer({ open, onClose, title, fields, initial, onSu
               </Label>
               {f.type === "geo"
                 ? <GeoField form={form} onChange={change} />
-                : <Field f={f} value={form[f.name]} onChange={change} options={options} />}
+                : f.type === "pricelist"
+                  ? <PriceListField name={f.name} value={form[f.name]} onChange={change} />
+                  : <Field f={f} value={form[f.name]} onChange={change} options={options} />}
             </div>
           ))}
           <div>

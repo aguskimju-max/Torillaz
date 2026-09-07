@@ -23,7 +23,7 @@ import { rupiah, angka, tanggal } from "@/lib/format";
 import { invoicePDF, notaPDF, suratJalanPDF } from "@/lib/pdf";
 
 let _ridSeq = 0;
-const newRow = () => ({ _rid: ++_ridSeq, item_id: "", qty: "", harga: "", diskon: "" });
+const newRow = () => ({ _rid: ++_ridSeq, item_id: "", qty: "", harga: "", harga_label: "", diskon: "" });
 
 const EMPTY = {
   pelanggan_id: "", gudang_id: "", tanggal: new Date().toISOString().slice(0, 10),
@@ -66,13 +66,24 @@ export default function SalesPage() {
   useEffect(() => { if (!open) setForm(EMPTY); }, [open]);
 
   const bjMap = useMemo(() => Object.fromEntries((barang || []).map((b) => [String(b.id), b])), [barang]);
+  const priceOpts = (bj) => bj
+    ? [{ label: "Standar", harga: Number(bj.harga_jual || 0) },
+       ...((Array.isArray(bj.harga_opsi) ? bj.harga_opsi : []).map((o) => ({ label: o.label, harga: Number(o.harga || 0) })))]
+    : [];
   const setItem = (idx, key, val) => setForm((p) => {
     const items = [...p.items];
     items[idx] = { ...items[idx], [key]: val };
     if (key === "item_id") {
       const bj = bjMap[val];
-      if (bj && !items[idx].harga) items[idx].harga = String(bj.harga_jual || "");
+      items[idx] = { ...items[idx], harga: String(bj?.harga_jual ?? ""), harga_label: "Standar" };
     }
+    return { ...p, items };
+  });
+  const setHargaOpsi = (idx, label) => setForm((p) => {
+    const items = [...p.items];
+    const bj = bjMap[items[idx].item_id];
+    const opt = priceOpts(bj).find((o) => o.label === label);
+    if (opt) items[idx] = { ...items[idx], harga: String(opt.harga), harga_label: opt.label };
     return { ...p, items };
   });
   const addRow = () => setForm((p) => ({ ...p, items: [...p.items, newRow()] }));
@@ -93,7 +104,7 @@ export default function SalesPage() {
       pajak_id: form.pajak_id === "none" ? undefined : form.pajak_id,
       rekening_id: form.rekening_id === "none" ? undefined : form.rekening_id,
       metode: form.metode || undefined, catatan: form.catatan || undefined,
-      items: validItems.map((i) => ({ item_id: i.item_id, qty: Number(i.qty), harga: Number(i.harga || 0), diskon: Number(i.diskon || 0) })),
+      items: validItems.map((i) => ({ item_id: i.item_id, qty: Number(i.qty), harga: Number(i.harga || 0), harga_label: i.harga_label || "Standar", diskon: Number(i.diskon || 0) })),
     })).data,
     onSuccess: (d) => { toast.success(`Sales Order ${d.no_so} dibuat`); qc.invalidateQueries({ queryKey: ["sales"] }); setOpen(false); },
     onError: (e) => toast.error(apiError(e)),
@@ -265,7 +276,22 @@ export default function SalesPage() {
                       </Select>
                     </div>
                     <Input data-testid={`sales-qty-${idx}`} className="col-span-2" type="number" step="any" placeholder="Qty" value={it.qty} onChange={(e) => setItem(idx, "qty", e.target.value)} />
-                    <Input data-testid={`sales-harga-${idx}`} className="col-span-2" type="number" placeholder="Harga" value={it.harga} onChange={(e) => setItem(idx, "harga", e.target.value)} />
+                    <div className="col-span-2">
+                      <Select value={it.harga_label || ""} onValueChange={(v) => setHargaOpsi(idx, v)} disabled={!it.item_id}>
+                        <SelectTrigger data-testid={`sales-harga-${idx}`} className="bg-white">
+                          <SelectValue placeholder="Harga...">
+                            {it.harga !== "" ? rupiah(Number(it.harga)) : "Harga..."}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white max-h-64">
+                          {priceOpts(bjMap[it.item_id]).map((o, oi) => (
+                            <SelectItem key={`${o.label}-${oi}`} value={o.label}>
+                              {o.label} — {rupiah(o.harga)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <Input data-testid={`sales-diskon-${idx}`} className="col-span-2" type="number" placeholder="Diskon" value={it.diskon} onChange={(e) => setItem(idx, "diskon", e.target.value)} />
                     <Button type="button" variant="ghost" size="icon" className="col-span-1 h-9 w-9" onClick={() => rmRow(idx)}><X className="h-4 w-4 text-rose-500" /></Button>
                   </div>
@@ -320,7 +346,7 @@ export default function SalesPage() {
                     {(detail.items || []).map((it, i) => (
                       <tr key={i} className="border-t border-slate-100 first:border-0">
                         <td className="px-3 py-1.5">{it.item_nama}</td>
-                        <td className="px-3 py-1.5 text-right text-slate-500">{angka(it.qty)} × {rupiah(it.harga)}</td>
+                        <td className="px-3 py-1.5 text-right text-slate-500">{angka(it.qty)} × {rupiah(it.harga)}{it.harga_label && it.harga_label !== "Standar" ? <span className="text-xs text-amber-600"> ({it.harga_label})</span> : null}</td>
                         <td className="px-3 py-1.5 text-right font-medium">{rupiah(it.subtotal)}</td>
                       </tr>
                     ))}

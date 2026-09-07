@@ -27,6 +27,7 @@ async def _build_items(raw_items):
         items.append({"item_id": it["item_id"], "item_nama": bj.get("nama"),
                       "kode": bj.get("kode"), "satuan": bj.get("satuan_nama") or "",
                       "qty": qty, "harga": harga, "diskon": diskon, "subtotal": line,
+                      "harga_label": it.get("harga_label") or "Standar",
                       "hpp": float(bj.get("harga_pokok") or 0)})
     return items, round(subtotal, 2), round(total_hpp, 2)
 

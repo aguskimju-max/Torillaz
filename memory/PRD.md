@@ -215,6 +215,17 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Tested: backend 12/12 PASS (termasuk backward-compat backup v1, error 400/401, audit, konsistensi stok);
   UI desktop+mobile render tanpa overflow.
 
+## Pilihan Harga Jual per Barang (2026-09-07)
+- Master Barang Jadi: field baru `harga_opsi:[{label,harga}]` (fleksibel, tambah/hapus per barang) via tipe field
+  `pricelist` di CrudDrawer (validasi baris lengkap, strip _rid, Number cast). Kolom "Opsi Harga" di tabel
+  (fmt pricelist di MasterPage). `harga_jual` tetap = harga Standar.
+- SalesPage: kolom harga per item kini dropdown "Standar — Rp X" + semua harga_opsi; TIDAK ada input manual
+  (keputusan user). Pilih item → auto Standar; state harga_label per baris; payload item kirim harga_label.
+  Detail order menampilkan label harga non-standar.
+- Backend: sales_router._build_items simpan `harga_label` (default "Standar"). Master generik tanpa perubahan.
+- Tested: backend 12/12 PASS (simpan/ambil harga_opsi, order dgn/tanpa harga_label, kirim + stok berkurang,
+  label bertahan seumur order); UI terverifikasi (form master, dropdown harga, subtotal benar).
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

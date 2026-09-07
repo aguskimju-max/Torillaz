@@ -149,13 +149,12 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Endpoint restore backup POST /api/backup/restore"
-    - "Backup export menyertakan password_hash (versi 2)"
+    - "Sales order menyimpan harga_label (pilihan harga per item)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -165,3 +164,21 @@ agent_communication:
     message: "Fitur restore backup baru. Login super admin: email 'admin' password 'torillaz123' (bukan format email, validasi sudah dilonggarkan). Test alur: login -> GET /api/backup (cek users punya password_hash & version 2) -> ubah sedikit data (mis. tambah 1 kategori via POST /api/master/kategori) -> POST /api/backup/restore dengan body hasil backup -> verifikasi kategori tambahan hilang (data kembali seperti backup), login admin masih bisa, stok/balances konsisten, audit log ada entry restore. Juga test error: body tanpa collections -> 400, koleksi tak dikenal -> masuk skipped."
   - agent: "testing"
     message: "✅ ALL BACKEND TESTS PASSED (12/12) - Backup & restore feature fully functional. Created comprehensive test suite at /app/backend_test.py covering: (1) Backup export with version 2 and password_hash preservation, (2) Full restore workflow with data reversion verification, (3) Login persistence after restore, (4) Stock consistency checks, (5) Audit logging, (6) Error handling (empty/unknown collections, no auth), (7) Backward compatibility with v1 backups. All scenarios passed successfully. Both backend tasks marked as working:true. Frontend testing NOT performed as per protocol."
+
+  - agent: "testing"
+    message: "✅ SALES ORDER HARGA_LABEL FEATURE - ALL TESTS PASSED (12/12). Tested at /app/backend_test_harga_label.py. Feature working perfectly: (1) Master barang_jadi stores and retrieves harga_opsi:[{label,harga}] correctly, (2) Sales order items save harga_label per item, (3) Backward compatibility confirmed - missing harga_label defaults to 'Standar', (4) Regression test passed - cash orders can be sent/kirim with stock deduction and auto-payment (status becomes 'lunas'), harga_label preserved throughout. No issues found. Task marked as working:true."
+
+  - task: "Sales order menyimpan harga_label (pilihan harga per item)"
+    implemented: true
+    working: true
+    file: "/app/backend/sales_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Master barang_jadi kini dapat menyimpan harga_opsi:[{label,harga}] (generic payload, tanpa perubahan backend master). sales_router._build_items menyimpan harga_label per item (default 'Standar'). Frontend: pricelist field di form barang jadi, dropdown harga di SalesPage (tanpa input manual)."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED (12/12 tests) - Sales order harga_label feature fully functional. (1) Master barang_jadi successfully stores harga_opsi array with {label, harga} structure - verified via PUT /api/master/barang_jadi/{id} and GET endpoints. (2) harga_opsi appears correctly in /api/master/barang_jadi/options endpoint. (3) Sales order items save harga_label correctly - POST /api/sales/order with harga_label:'Grosir' creates order with correct label and price (9000). (4) harga_label preserved in GET /api/sales/orders/{id} and list view. (5) Backward compatibility verified - orders without harga_label default to 'Standar'. (6) Regression test passed - cash order can be sent via POST /api/sales/orders/{id}/kirim, stock decreases correctly, invoice generated, status becomes 'lunas' (auto-payment for cash sales), and harga_label preserved after kirim. All scenarios working as expected."
