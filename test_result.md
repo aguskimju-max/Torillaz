@@ -101,3 +101,67 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+user_problem_statement: "Pada menu Backup Data, tambahkan tools import/restore sehingga data yang di-backup bisa langsung digunakan kembali."
+
+backend:
+  - task: "Backup export menyertakan password_hash (versi 2)"
+    implemented: true
+    working: true
+    file: "/app/backend/misc_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/backup kini mengembalikan dokumen mentah (id string, password_hash user disertakan) + field version:2 + audit log export."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - GET /api/backup verified: returns version:2, generated_at timestamp, collections object. Users collection contains password_hash field (not stripped), uses 'id' field instead of '_id'. Counters collection has string IDs (e.g., 'KAT', 'SUP') as expected. All 12 test scenarios passed including data integrity checks."
+  - task: "Endpoint restore backup POST /api/backup/restore"
+    implemented: true
+    working: true
+    file: "/app/backend/misc_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Restore replace-mode: whitelist BACKUP_COLLECTIONS, konversi id->_id (ObjectId atau string utk counters), preserve password_hash user lama jika file backup versi 1 (tanpa hash), seed_admin dipanggil setelah restore users agar admin env (admin/torillaz123) selalu bisa login, audit log restore. Return {restored, total, skipped}. Permission: pengaturan.edit."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - POST /api/backup/restore fully functional: (1) Successfully restores backup data with correct response structure {restored, total, skipped}. (2) Data reverted correctly - test kategori created before restore was removed after restore. (3) Login works after restore (admin/torillaz123) - seed_admin ensures admin credentials preserved. (4) Stock consistency maintained - GET /api/stock/summary returns valid data. (5) Audit log records restore action - GET /api/audit?action=restore shows restore entry. (6) Error handling works: 400 for empty collections, 400 for unknown collections, 401 without auth. (7) Backward compatibility verified - v1 backup (without password_hash) restores successfully and login still works."
+
+frontend:
+  - task: "BackupPage: kartu Import/Restore Data"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/settings/BackupPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pilih file JSON -> preview ringkasan koleksi+jumlah -> dialog konfirmasi destruktif -> POST /backup/restore -> toast sukses + invalidateQueries. data-testid: restore-file-input, restore-pick-btn, restore-preview, restore-btn, restore-confirm-dialog, restore-confirm, restore-cancel, restore-success."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 2
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Endpoint restore backup POST /api/backup/restore"
+    - "Backup export menyertakan password_hash (versi 2)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Fitur restore backup baru. Login super admin: email 'admin' password 'torillaz123' (bukan format email, validasi sudah dilonggarkan). Test alur: login -> GET /api/backup (cek users punya password_hash & version 2) -> ubah sedikit data (mis. tambah 1 kategori via POST /api/master/kategori) -> POST /api/backup/restore dengan body hasil backup -> verifikasi kategori tambahan hilang (data kembali seperti backup), login admin masih bisa, stok/balances konsisten, audit log ada entry restore. Juga test error: body tanpa collections -> 400, koleksi tak dikenal -> masuk skipped."
+  - agent: "testing"
+    message: "✅ ALL BACKEND TESTS PASSED (12/12) - Backup & restore feature fully functional. Created comprehensive test suite at /app/backend_test.py covering: (1) Backup export with version 2 and password_hash preservation, (2) Full restore workflow with data reversion verification, (3) Login persistence after restore, (4) Stock consistency checks, (5) Audit logging, (6) Error handling (empty/unknown collections, no auth), (7) Backward compatibility with v1 backups. All scenarios passed successfully. Both backend tasks marked as working:true. Frontend testing NOT performed as per protocol."

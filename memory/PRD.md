@@ -205,6 +205,16 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Validasi `EmailStr` → `str` di auth_router (login) & settings_router (user CRUD) agar username non-email diterima; input login frontend `type="email"` → `type="text"`.
 - Terverifikasi: login `admin` via UI preview → dashboard OK; kredensial lama ditolak (401).
 
+## Backup: Import/Restore Data (2026-09-07)
+- Backend: `GET /api/backup` versi 2 (sertakan password_hash users, id string, audit log export).
+  `POST /api/backup/restore` (izin pengaturan.edit): replace-mode per koleksi whitelist, konversi id→_id
+  (ObjectId / string utk counters), preserve hash user lama utk backup v1, panggil seed_admin setelah
+  restore users (admin env selalu bisa login), audit log restore, return {restored,total,skipped}.
+- Frontend BackupPage: kartu "Import / Restore Data" — pilih file .json → preview ringkasan koleksi+jumlah
+  → dialog konfirmasi destruktif → restore → toast + invalidateQueries + panel sukses.
+- Tested: backend 12/12 PASS (termasuk backward-compat backup v1, error 400/401, audit, konsistensi stok);
+  UI desktop+mobile render tanpa overflow.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.
