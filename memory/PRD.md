@@ -200,6 +200,11 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Dependencies backend (pip) & frontend (yarn) di-install ulang; backend + frontend restart via supervisor.
 - Verifikasi: backend health 200, seed selesai, login super admin OK, dashboard render penuh (KPI, sidebar semua modul, branding Torillaz) via URL preview.
 
+## Ganti Kredensial Super Admin (2026-09-07)
+- Super admin kini: email `admin`, password `torillaz123` (akun lama aguskimju@gmail.com dihapus, ADMIN_EMAIL/ADMIN_PASSWORD di backend/.env diubah).
+- Validasi `EmailStr` → `str` di auth_router (login) & settings_router (user CRUD) agar username non-email diterima; input login frontend `type="email"` → `type="text"`.
+- Terverifikasi: login `admin` via UI preview → dashboard OK; kredensial lama ditolak (401).
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

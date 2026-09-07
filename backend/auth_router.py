@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Response, HTTPException, Depends, Body
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 from db import db, oid, now_iso, log_audit
 from security import (hash_password, verify_password, create_access_token,
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 class LoginInput(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 

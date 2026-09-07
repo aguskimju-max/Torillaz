@@ -48,7 +48,7 @@ export default function Login() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  data-testid="login-email" type="email" value={email}
+                  data-testid="login-email" type="text" value={email}
                   onChange={(e) => setEmail(e.target.value)} className="pl-9" placeholder="email@perusahaan.com" required
                 />
               </div>

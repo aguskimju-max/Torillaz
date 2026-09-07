@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Body
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 
 from db import db, oid, now_iso, serialize, log_audit
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api", tags=["settings"])
 # ---------------- USERS ----------------
 class UserCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
     role: str
     is_active: bool = True
