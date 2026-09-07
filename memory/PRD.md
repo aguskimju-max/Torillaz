@@ -195,6 +195,11 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - Ditambahkan 3 kartu KPI di atas tabel rekap Stok Saat Ini: **Total Nilai Persediaan** (grand-total nilai seluruh stok), **Jumlah Item**, **Item Stok Minimum** — dihitung dari data `/stock/summary`.
 - Terverifikasi (screenshot): Total Nilai Rp 14.902.143, 9 item, 1 stok minimum.
 
+## Rebuild dari Repositori Torillaz (2026-09-07)
+- Kode lokal diverifikasi identik dengan `github.com/aguskimju-max/Torillaz` (commit fccd232, sinkron origin/main).
+- Dependencies backend (pip) & frontend (yarn) di-install ulang; backend + frontend restart via supervisor.
+- Verifikasi: backend health 200, seed selesai, login super admin OK, dashboard render penuh (KPI, sidebar semua modul, branding Torillaz) via URL preview.
+
 ## Next Tasks
 - (Menunggu arahan user) Fase 4 (Pembelian): PR, PO, Penerimaan Barang, Hutang Supplier — terhubung ke stok & keuangan.
 - (Backlog) Sistem Notifikasi & Alert: stok minimum, produk expired, jatuh tempo pembayaran.

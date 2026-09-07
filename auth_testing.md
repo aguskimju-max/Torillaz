@@ -4,7 +4,7 @@ Admin credentials are in /app/memory/test_credentials.md.
 
 ## API test
 ```
-API=https://dashboard-kpi-6.preview.emergentagent.com
+API=https://project-torillaz.preview.emergentagent.com
 curl -c cookies.txt -X POST $API/api/auth/login -H "Content-Type: application/json" \
   -d '{"email":"aguskimju@gmail.com","password":"Admin@12345"}'
 curl -b cookies.txt $API/api/auth/me
