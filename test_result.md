@@ -134,6 +134,17 @@ backend:
         comment: "✅ PASSED - POST /api/backup/restore fully functional: (1) Successfully restores backup data with correct response structure {restored, total, skipped}. (2) Data reverted correctly - test kategori created before restore was removed after restore. (3) Login works after restore (admin/torillaz123) - seed_admin ensures admin credentials preserved. (4) Stock consistency maintained - GET /api/stock/summary returns valid data. (5) Audit log records restore action - GET /api/audit?action=restore shows restore entry. (6) Error handling works: 400 for empty collections, 400 for unknown collections, 401 without auth. (7) Backward compatibility verified - v1 backup (without password_hash) restores successfully and login still works."
 
 frontend:
+  - task: "Label harga di Invoice & Nota PDF"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/lib/pdf.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "itemsTable (withPrice) kini menampilkan harga_label di baris kedua kolom Harga: 'Rp 9.000\\n(Grosir)'. Dipakai bersama oleh invoicePDF & notaPDF. Backward compatible: item tanpa harga_label hanya tampil harga. Diverifikasi end-to-end: PDF Invoice-INV-0001.pdf & Nota-SO-0001.pdf diunduh via UI (playwright expect_download), konten PDF diperiksa byte-level dan mengandung 'Grosir', 'Rp 9.000', nama produk. Juga diuji via node script (jspdf+autotable) untuk 3 kasus: Grosir, Standar, tanpa label."
   - task: "BackupPage: kartu Import/Restore Data"
     implemented: true
     working: "NA"

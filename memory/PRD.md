@@ -58,6 +58,8 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
   dengan badge overdue/sebagian, aksi bayar langsung.
 - **Cetak dokumen PDF** (lib/pdf.js via jspdf + jspdf-autotable): Invoice, Nota, Surat Jalan
   dengan header perusahaan, tabel item, ringkasan total & status pembayaran → download PDF.
+  Kolom Harga di Invoice & Nota menampilkan label harga per item (mis. "(Grosir)") di bawah nominal;
+  item tanpa harga_label (order lama) hanya tampil harga (backward compatible).
 - Rute terdaftar di App.js: /produksi/bom, /produksi/order, /penjualan, /penjualan/piutang.
 - Tested: frontend flows 100% PASSED (iteration_2.json), no bugs.
 

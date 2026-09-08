@@ -134,7 +134,7 @@ function itemsTable(doc, startY, so, withPrice) {
     : [["#", "Kode", "Produk", "Qty", "Satuan"]];
   const body = (so.items || []).map((it, i) =>
     withPrice
-      ? [i + 1, it.item_nama, angka(it.qty), it.satuan || "", rupiah(it.harga), rupiah(it.diskon || 0), rupiah(it.subtotal)]
+      ? [i + 1, it.item_nama, angka(it.qty), it.satuan || "", `${rupiah(it.harga)}${it.harga_label ? `\n(${it.harga_label})` : ""}`, rupiah(it.diskon || 0), rupiah(it.subtotal)]
       : [i + 1, it.kode || "", it.item_nama, angka(it.qty), it.satuan || ""]
   );
   autoTable(doc, {
