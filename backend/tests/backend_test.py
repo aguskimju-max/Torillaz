@@ -10,7 +10,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL",
-                          "https://project-torillaz.preview.emergentagent.com").rstrip("/")
+                          "https://repo-ulang-build.preview.emergentagent.com").rstrip("/")
 ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "aguskimju@gmail.com")
 ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD", "Admin@12345")
 
