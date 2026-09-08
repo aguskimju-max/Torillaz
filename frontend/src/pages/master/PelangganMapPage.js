@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
 
 const DEFAULT_CENTER = [-2.5, 118.0];
 const hasGeo = (c) => c.latitude != null && c.longitude != null && c.latitude !== "" && c.longitude !== "";
-const dirUrl = (c) => `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}`;
+const dirUrl = (c) => c.maps_link || `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}`;
 
 function FitBounds({ points }) {
   const map = useMap();
@@ -35,6 +35,7 @@ export default function PelangganMapPage() {
   });
   const all = useMemo(() => data?.items || [], [data]);
   const withGeo = useMemo(() => all.filter(hasGeo), [all]);
+  const linkOnly = useMemo(() => all.filter((c) => !hasGeo(c) && c.maps_link), [all]);
   const points = useMemo(() => withGeo.map((c) => [Number(c.latitude), Number(c.longitude)]), [withGeo]);
 
   return (
@@ -83,7 +84,21 @@ export default function PelangganMapPage() {
                 </a>
               </div>
             ))}
-            {!isLoading && withGeo.length === 0 && (
+            {linkOnly.length > 0 && (
+              <div className="pt-2">
+                <div className="text-[11px] uppercase tracking-wide text-slate-400 px-1 mb-1">Hanya link maps (tanpa pin)</div>
+                {linkOnly.map((c) => (
+                  <div key={c.id} className="p-2 rounded-md border border-dashed border-slate-200 hover:bg-slate-50 mb-1.5" data-testid={`map-link-item-${c.id}`}>
+                    <div className="font-medium text-slate-800 text-sm truncate">{c.nama_toko || c.nama}</div>
+                    {c.nama_toko && <div className="text-xs text-slate-400 truncate">{c.nama}</div>}
+                    <a href={c.maps_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium mt-1">
+                      <Navigation className="h-3 w-3" /> Arah
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isLoading && withGeo.length === 0 && linkOnly.length === 0 && (
               <div className="text-center text-slate-400 text-sm py-8 px-2">
                 <MapPin className="h-6 w-6 mx-auto mb-2 opacity-50" />
                 Belum ada pelanggan dengan koordinat. Tambahkan lokasi GPS di menu Pelanggan.

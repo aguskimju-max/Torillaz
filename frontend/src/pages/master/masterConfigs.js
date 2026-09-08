@@ -82,7 +82,7 @@ export const MASTER_CONFIGS = {
       { name: "telepon", label: "Telepon", type: "text" },
       { name: "email", label: "Email", type: "text" },
       { name: "alamat", label: "Alamat", type: "textarea" },
-      { name: "lokasi", label: "Koordinat Lokasi (GPS)", type: "geo" },
+      { name: "lokasi", label: "Lokasi (GPS / Link Google Maps)", type: "geo" },
       { name: "kategori", label: "Kategori", type: "select", options: [{ value: "Retail", label: "Retail" }, { value: "Grosir", label: "Grosir" }, { value: "Distributor", label: "Distributor" }] },
       { name: "term", label: "Term Pembayaran (hari)", type: "number" },
     ],

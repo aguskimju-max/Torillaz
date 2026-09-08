@@ -63,6 +63,9 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
 - **Cetak Invoice thermal** (invoiceThermalPDF di lib/pdf.js): struk 58mm & 80mm, tinggi kertas dinamis
   (render 2-pass), cetak langsung (autoPrint + tab baru) atau unduh PDF; tombol dropdown "Struk Thermal"
   di dialog detail SalesPage (muncul jika status != draft).
+- **Lokasi pelanggan via Link Google Maps** (GeoField di CrudDrawer.js): selain GPS/koordinat, bisa tempel
+  link Google Maps (field maps_link); koordinat auto-terdeteksi dari link (pola !3d!4d, q=, @, dll);
+  link pendek tetap dipakai untuk tombol Arah; Peta Pelanggan menampilkan pelanggan hanya-link di daftar terpisah.
 - Rute terdaftar di App.js: /produksi/bom, /produksi/order, /penjualan, /penjualan/piutang.
 - Tested: frontend flows 100% PASSED (iteration_2.json), no bugs.
 

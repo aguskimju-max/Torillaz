@@ -154,6 +154,17 @@ backend:
         comment: "✅ REGRESSION CONFIRMED - Restore functionality verified in full regression test. 146 documents restored, data reverted correctly, login works after restore, audit log recorded."
 
 frontend:
+  - task: "Input manual Link Google Maps di form Pelanggan (opsi selain GPS)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/common/CrudDrawer.js, /app/frontend/src/pages/master/MasterPage.js, /app/frontend/src/pages/master/PelangganMapPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GeoField: input maps_link (data-testid field-maps-link) + parseMapsLink auto-ekstrak koordinat dari pola !3d!4d, q=, ll=, /place/, @, 'lat,lng' -> auto-isi lat/lng + toast. Link pendek (goo.gl/maps.app) -> warning amber, tetap tersimpan utk arah. Buka Arah pakai maps_link jika ada. Kolom Lokasi (fmt maps) di MasterPage & Peta Pelanggan (dirUrl) prefer maps_link; pelanggan hanya-link tampil di daftar 'Hanya link maps (tanpa pin)'. Backend generic engine simpan maps_link tanpa perubahan. Diverifikasi via screenshot: paste link Monas -> lat/lng terisi (-6.175392, 106.824964), simpan OK, kolom Arah tampil, shortlink warning tampil, peta menampilkan pin + seksi link-only. Data uji dummy dibersihkan setelah verifikasi."
   - task: "Cetak Invoice format printer thermal 58mm/80mm"
     implemented: true
     working: true

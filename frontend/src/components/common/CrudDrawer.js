@@ -38,11 +38,44 @@ function PriceListField({ name, value, onChange }) {
   );
 }
 
+function parseMapsLink(url) {
+  if (!url) return null;
+  const s = String(url).trim();
+  const pats = [
+    /!3d(-?\d{1,3}\.?\d*)!4d(-?\d{1,3}\.?\d*)/,                                  // pin tempat (paling akurat)
+    /[?&](?:q|ll|query|destination)=(-?\d{1,3}\.?\d*)(?:,|%2C)\s*(-?\d{1,3}\.?\d*)/i, // ?q=lat,lng
+    /\/place\/(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/,                             // /place/lat,lng
+    /@(-?\d{1,3}\.?\d*),(-?\d{1,3}\.?\d*)/,                                      // @lat,lng (pusat peta)
+    /^(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/,                                 // teks "lat, lng"
+  ];
+  for (const re of pats) {
+    const m = s.match(re);
+    if (m) {
+      const lat = Number(m[1]);
+      const lng = Number(m[2]);
+      if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) return { lat, lng };
+    }
+  }
+  return null;
+}
+
 function GeoField({ form, onChange }) {
   const [loading, setLoading] = useState(false);
   const lat = form?.latitude ?? "";
   const lng = form?.longitude ?? "";
+  const link = form?.maps_link ?? "";
   const hasCoords = lat !== "" && lng !== "" && lat != null && lng != null;
+  const isShortLink = /goo\.gl|maps\.app/i.test(link);
+  const arahHref = link || (hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}` : null);
+  const onLinkChange = (v) => {
+    onChange("maps_link", v);
+    const c = parseMapsLink(v);
+    if (c && (Number(lat) !== Number(c.lat.toFixed(6)) || Number(lng) !== Number(c.lng.toFixed(6)))) {
+      onChange("latitude", Number(c.lat.toFixed(6)));
+      onChange("longitude", Number(c.lng.toFixed(6)));
+      toast.success("Koordinat terdeteksi dari link & terisi otomatis");
+    }
+  };
   const ambilLokasi = () => {
     if (!navigator.geolocation) return toast.error("Perangkat tidak mendukung layanan lokasi");
     setLoading(true);
@@ -66,18 +99,28 @@ function GeoField({ form, onChange }) {
         <Input data-testid="field-latitude" type="number" step="any" placeholder="Latitude" value={lat} onChange={(e) => onChange("latitude", e.target.value === "" ? "" : Number(e.target.value))} />
         <Input data-testid="field-longitude" type="number" step="any" placeholder="Longitude" value={lng} onChange={(e) => onChange("longitude", e.target.value === "" ? "" : Number(e.target.value))} />
       </div>
+      <div className="flex items-center gap-2">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-[11px] uppercase tracking-wide text-slate-400">atau tempel link</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+      <Input data-testid="field-maps-link" type="text" placeholder="Link Google Maps (cth: https://maps.app.goo.gl/... )"
+        value={link} onChange={(e) => onLinkChange(e.target.value)} />
+      {isShortLink && !hasCoords && (
+        <p className="text-xs text-amber-600">Link pendek tersimpan & bisa dipakai untuk arah, namun koordinat tidak bisa dibaca otomatis — isi manual jika ingin tampil di Peta Pelanggan.</p>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" data-testid="btn-ambil-lokasi" onClick={ambilLokasi} disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <MapPin className="h-4 w-4 mr-1.5 text-emerald-600" />}
           {loading ? "Mengambil lokasi..." : "Ambil Lokasi Sekarang"}
         </Button>
-        {hasCoords && (
-          <a href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`} target="_blank" rel="noreferrer" data-testid="link-maps" className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+        {arahHref && (
+          <a href={arahHref} target="_blank" rel="noreferrer" data-testid="link-maps" className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">
             <Navigation className="h-3.5 w-3.5" /> Buka Arah (Google Maps)
           </a>
         )}
       </div>
-      <p className="text-xs text-slate-400">Ambil saat berada di toko pelanggan (butuh izin lokasi HP & koneksi HTTPS). Untuk penunjuk arah nanti.</p>
+      <p className="text-xs text-slate-400">Isi koordinat GPS (tombol Ambil Lokasi saat di toko pelanggan) atau tempel link Google Maps. Jika link memuat koordinat, kolom terisi otomatis.</p>
     </div>
   );
 }
@@ -132,6 +175,7 @@ export default function CrudDrawer({ open, onClose, title, fields, initial, onSu
         if (f.type === "geo") {
           base.latitude = initial?.latitude ?? "";
           base.longitude = initial?.longitude ?? "";
+          base.maps_link = initial?.maps_link ?? "";
         } else if (f.type === "pricelist") {
           base[f.name] = (Array.isArray(initial?.[f.name]) ? initial[f.name] : [])
             .map((r) => ({ _rid: ++_plRid, label: r.label ?? "", harga: r.harga ?? "" }));
@@ -177,6 +221,7 @@ export default function CrudDrawer({ open, onClose, title, fields, initial, onSu
       });
       if (payload.latitude === "") payload.latitude = null;
       if (payload.longitude === "") payload.longitude = null;
+      if (typeof payload.maps_link === "string") payload.maps_link = payload.maps_link.trim() || null;
       await onSubmit(payload);
     } catch (e) {
       setError(e);

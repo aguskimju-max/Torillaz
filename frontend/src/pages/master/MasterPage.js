@@ -112,9 +112,13 @@ export default function MasterPage() {
         if (c.fmt === "pricelist") return Array.isArray(v) && v.length
           ? <span className="text-xs text-slate-600">{v.map((o) => `${o.label}: ${rupiah(o.harga)}`).join(" · ")}</span>
           : "-";
-        if (c.fmt === "maps") return (row.latitude != null && row.longitude != null && row.latitude !== "" && row.longitude !== "")
-          ? <a href={`https://www.google.com/maps/dir/?api=1&destination=${row.latitude},${row.longitude}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700"><MapPin className="h-3.5 w-3.5" /> Arah</a>
-          : "-";
+        if (c.fmt === "maps") {
+          const hasCoords = row.latitude != null && row.longitude != null && row.latitude !== "" && row.longitude !== "";
+          const href = row.maps_link || (hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${row.latitude},${row.longitude}` : null);
+          return href
+            ? <a href={href} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700"><MapPin className="h-3.5 w-3.5" /> Arah</a>
+            : "-";
+        }
         return v ?? "-";
       },
     })),
