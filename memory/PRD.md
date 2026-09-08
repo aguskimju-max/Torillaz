@@ -60,6 +60,9 @@ Single source of truth: satu input transaksi memperbarui seluruh modul terkait o
   dengan header perusahaan, tabel item, ringkasan total & status pembayaran → download PDF.
   Kolom Harga di Invoice & Nota menampilkan label harga per item (mis. "(Grosir)") di bawah nominal;
   item tanpa harga_label (order lama) hanya tampil harga (backward compatible).
+- **Cetak Invoice thermal** (invoiceThermalPDF di lib/pdf.js): struk 58mm & 80mm, tinggi kertas dinamis
+  (render 2-pass), cetak langsung (autoPrint + tab baru) atau unduh PDF; tombol dropdown "Struk Thermal"
+  di dialog detail SalesPage (muncul jika status != draft).
 - Rute terdaftar di App.js: /produksi/bom, /produksi/order, /penjualan, /penjualan/piutang.
 - Tested: frontend flows 100% PASSED (iteration_2.json), no bugs.
 

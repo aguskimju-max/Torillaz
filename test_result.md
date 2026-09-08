@@ -134,6 +134,17 @@ backend:
         comment: "✅ PASSED - POST /api/backup/restore fully functional: (1) Successfully restores backup data with correct response structure {restored, total, skipped}. (2) Data reverted correctly - test kategori created before restore was removed after restore. (3) Login works after restore (admin/torillaz123) - seed_admin ensures admin credentials preserved. (4) Stock consistency maintained - GET /api/stock/summary returns valid data. (5) Audit log records restore action - GET /api/audit?action=restore shows restore entry. (6) Error handling works: 400 for empty collections, 400 for unknown collections, 401 without auth. (7) Backward compatibility verified - v1 backup (without password_hash) restores successfully and login still works."
 
 frontend:
+  - task: "Cetak Invoice format printer thermal 58mm/80mm"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/lib/pdf.js, /app/frontend/src/pages/penjualan/SalesPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "invoiceThermalPDF(so, company, cust, {width:58|80, action:'print'|'download'}): render struk 2-pass (tinggi kertas dinamis sesuai isi), header perusahaan centered, item+harga_label, TOTAL bold, status. action=print -> autoPrint + window.open(bloburl); download -> save PDF. UI: dropdown 'Struk Thermal' (data-testid print-thermal, thermal-print-58/80, thermal-dl-58/80) di dialog detail SalesPage. Diverifikasi end-to-end: PDF 80mm MediaBox 226.77pt & 58mm 164.41pt (tepat 80/58mm), konten lengkap, tab print terbuka + toast, render visual PDF via pypdfium2 rapi di kedua ukuran."
   - task: "Label harga di Invoice & Nota PDF"
     implemented: true
     working: true

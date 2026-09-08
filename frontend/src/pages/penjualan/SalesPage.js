@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, X, Truck, HandCoins, Trash2, Eye, FileText, Receipt, FileDown } from "lucide-react";
+import { ShoppingCart, Plus, X, Truck, HandCoins, Trash2, Eye, FileText, Receipt, FileDown, Printer } from "lucide-react";
 import { toast } from "sonner";
 import api, { apiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -20,7 +20,11 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { rupiah, angka, tanggal } from "@/lib/format";
-import { invoicePDF, notaPDF, suratJalanPDF } from "@/lib/pdf";
+import { invoicePDF, notaPDF, suratJalanPDF, invoiceThermalPDF } from "@/lib/pdf";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 let _ridSeq = 0;
 const newRow = () => ({ _rid: ++_ridSeq, item_id: "", qty: "", harga: "", harga_label: "", diskon: "" });
@@ -151,6 +155,12 @@ export default function SalesPage() {
     if (type === "invoice") invoicePDF(so, company, cust);
     else if (type === "nota") notaPDF(so, company, cust);
     else suratJalanPDF(so, company, cust);
+  };
+
+  const doThermal = (so, width, action) => {
+    const cust = custMap[String(so.pelanggan_id)];
+    invoiceThermalPDF(so, company, cust, { width, action });
+    if (action === "print") toast.info(`Membuka dialog cetak struk ${width}mm...`);
   };
 
   const salesExportColumns = [
@@ -360,6 +370,22 @@ export default function SalesPage() {
                   <Button variant="outline" size="sm" data-testid="print-invoice" onClick={() => doPrint(detail, "invoice")}><FileText className="h-4 w-4 mr-1.5" /> Invoice</Button>
                   <Button variant="outline" size="sm" data-testid="print-nota" onClick={() => doPrint(detail, "nota")}><Receipt className="h-4 w-4 mr-1.5" /> Nota</Button>
                   <Button variant="outline" size="sm" data-testid="print-sj" onClick={() => doPrint(detail, "sj")}><FileDown className="h-4 w-4 mr-1.5" /> Surat Jalan</Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" data-testid="print-thermal" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                        <Printer className="h-4 w-4 mr-1.5" /> Struk Thermal
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white">
+                      <DropdownMenuLabel className="text-xs text-slate-400 font-normal">Cetak langsung</DropdownMenuLabel>
+                      <DropdownMenuItem data-testid="thermal-print-58" onClick={() => doThermal(detail, 58, "print")}><Printer className="h-3.5 w-3.5 mr-2 text-slate-400" /> Cetak 58mm</DropdownMenuItem>
+                      <DropdownMenuItem data-testid="thermal-print-80" onClick={() => doThermal(detail, 80, "print")}><Printer className="h-3.5 w-3.5 mr-2 text-slate-400" /> Cetak 80mm</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-slate-400 font-normal">Unduh PDF</DropdownMenuLabel>
+                      <DropdownMenuItem data-testid="thermal-dl-58" onClick={() => doThermal(detail, 58, "download")}><FileDown className="h-3.5 w-3.5 mr-2 text-slate-400" /> PDF 58mm</DropdownMenuItem>
+                      <DropdownMenuItem data-testid="thermal-dl-80" onClick={() => doThermal(detail, 80, "download")}><FileDown className="h-3.5 w-3.5 mr-2 text-slate-400" /> PDF 80mm</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
             </div>

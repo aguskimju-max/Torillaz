@@ -183,6 +183,102 @@ export async function notaPDF(so, company, customer) {
   doc.save(`Nota-${so.no_so}.pdf`);
 }
 
+// ---------- Struk Thermal (58mm / 80mm) ----------
+function renderThermalInvoice(doc, so, company, customer, W) {
+  const c = company || {};
+  const small = W <= 58;
+  const M = small ? 3 : 5;          // margin kiri/kanan
+  const CW = W - M * 2;             // lebar konten
+  const R = W - M;                  // posisi kanan
+  const CX = W / 2;                 // tengah
+  const FS = small ? 6.8 : 8;       // ukuran font dasar
+  const LH = small ? 3.1 : 3.6;     // tinggi baris
+  let y = 7;
+
+  const line = () => {
+    doc.setDrawColor(130);
+    doc.setLineWidth(0.2);
+    try { doc.setLineDashPattern([0.8, 0.8], 0); } catch { /* fallback solid */ }
+    doc.line(M, y, R, y);
+    try { doc.setLineDashPattern([], 0); } catch { /* noop */ }
+    y += LH * 0.9;
+  };
+  const centerText = (txt, fs = FS, bold = false) => {
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(fs);
+    doc.splitTextToSize(String(txt), CW).forEach((l) => { doc.text(l, CX, y, { align: "center" }); y += LH; });
+  };
+  const kv = (k, v, boldV = false) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(FS);
+    doc.text(String(k), M, y);
+    doc.setFont("helvetica", boldV ? "bold" : "normal");
+    doc.text(String(v), R, y, { align: "right" });
+    y += LH;
+  };
+
+  doc.setTextColor(20);
+  centerText(c.nama || "Torillaz Tortilla", FS + (small ? 2.2 : 3), true);
+  if (c.alamat) centerText(String(c.alamat), FS - 0.8);
+  if (c.telepon) centerText(`Telp: ${c.telepon}`, FS - 0.8);
+  y += 0.5; line();
+  centerText("INVOICE", FS + 1.5, true);
+  centerText(so.no_invoice || so.no_so || "-", FS - 0.5);
+  y += 0.5;
+  kv("Tanggal", tanggal(so.tanggal));
+  kv("No. SO", so.no_so || "-");
+  kv("Pelanggan", so.pelanggan_nama || "-");
+  if (so.tipe === "kredit") kv("Jatuh Tempo", tanggal(so.jatuh_tempo));
+  line();
+  (so.items || []).forEach((it) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS);
+    doc.splitTextToSize(String(it.item_nama || "-"), CW).forEach((l) => { doc.text(l, M, y); y += LH; });
+    doc.setFont("helvetica", "normal");
+    const qtyLine = `${angka(it.qty)} ${it.satuan || ""} x ${rupiah(it.harga)}${it.harga_label ? ` (${it.harga_label})` : ""}`;
+    const ql = doc.splitTextToSize(qtyLine, CW - (small ? 14 : 20));
+    ql.forEach((l, i) => {
+      doc.text(l, M, y);
+      if (i === ql.length - 1) doc.text(rupiah(it.subtotal), R, y, { align: "right" });
+      y += LH;
+    });
+    if (it.diskon) kv("  Diskon", `-${rupiah(it.diskon)}`);
+    y += 0.4;
+  });
+  line();
+  kv("Subtotal", rupiah(so.subtotal));
+  if (so.pajak_nominal) kv(`Pajak ${so.pajak_nama || ""} ${angka(so.pajak_persen)}%`, rupiah(so.pajak_nominal));
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(FS + 1.5);
+  doc.text("TOTAL", M, y + 0.4);
+  doc.text(rupiah(so.total), R, y + 0.4, { align: "right" });
+  y += LH + 1.2;
+  kv("Terbayar", rupiah(so.terbayar));
+  kv("Sisa", rupiah(so.sisa));
+  kv("Status", (so.status || "").toUpperCase(), true);
+  line();
+  centerText("Terima kasih atas kepercayaan Anda.", FS - 0.8);
+  y += 1;
+  return y;
+}
+
+export async function invoiceThermalPDF(so, company, customer, opts = {}) {
+  const W = Number(opts.width) === 58 ? 58 : 80;
+  const action = opts.action === "download" ? "download" : "print";
+  // pass 1: ukur tinggi konten pada kertas probe
+  const probe = new jsPDF({ unit: "mm", format: [W, 2000] });
+  const h = renderThermalInvoice(probe, so, company, customer, W);
+  // pass 2: render final dengan tinggi pas
+  const doc = new jsPDF({ unit: "mm", format: [W, Math.max(h + 4, 50)] });
+  renderThermalInvoice(doc, so, company, customer, W);
+  if (action === "download") {
+    doc.save(`Invoice-${so.no_invoice || so.no_so}-${W}mm.pdf`);
+  } else {
+    doc.autoPrint();
+    window.open(doc.output("bloburl"), "_blank");
+  }
+}
+
 export async function suratJalanPDF(so, company, customer) {
   const doc = new jsPDF();
   const logo = await loadLogo();
