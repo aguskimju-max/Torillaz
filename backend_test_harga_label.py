@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional
 from datetime import date
 
 # Base URL from frontend/.env
-BASE_URL = "https://repo-ulang-build.preview.emergentagent.com/api"
+BASE_URL = "https://torillaz-rebuild.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_EMAIL = "admin"
