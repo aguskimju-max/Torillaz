@@ -101,9 +101,23 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
-user_problem_statement: "Pada menu Backup Data, tambahkan tools import/restore sehingga data yang di-backup bisa langsung digunakan kembali."
+user_problem_statement: "Berikan fitur penyesuaian stok pada menu stok agar bisa disesuaikan dengan stock actual sesuai jenis barang."
 
 backend:
+  - task: "Bulk Stock Opname Endpoint (POST /api/stock/opname-bulk)"
+    implemented: true
+    working: true
+    file: "/app/backend/stock_router.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Endpoint baru POST /api/stock/opname-bulk (require gudang:add). Payload {keterangan?, items:[{item_type, item_id, gudang_id, batch?, expired_date?, qty_aktual}]}. Per baris: selisih = qty_aktual - qty sistem; selisih 0 dilewati (skipped); saldo di-set ke qty_aktual (avg_price dipertahankan); movement tipe 'opname' dicatat dengan qty=selisih, saldo_akhir=qty_aktual, keterangan berisi Sistem/Fisik/Selisih. Validasi: items kosong -> 400, >200 baris -> 400, qty_aktual negatif/tidak valid -> 400, item/gudang kosong -> 400. Audit log tunggal berisi ringkasan item. Response {adjusted, skipped, results:[{no_transaksi, item_nama, item_kode, gudang_nama, batch, qty_sistem, qty_aktual, selisih}]}."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL TESTS PASSED (30/30) - Bulk stock opname endpoint fully functional. Test file: /app/backend_test_opname_bulk.py. Comprehensive testing completed: (1) SUCCESSFUL BULK OPNAME: Tested with 3 items (bahan_baku +5, barang_jadi -2, duplicate same qty). Response correct: adjusted=2, skipped=1, results array contains 2 items with correct selisih calculations. (2) BALANCES UPDATED: Verified qty updated to qty_aktual for both items (Box Kemasan 800→805, Kue Kering Premium 15→13), avg_price preserved unchanged (2500.0 and 25000.0 respectively). (3) MOVEMENTS CREATED: Verified 2 opname movements created with tipe='opname', qty=signed selisih (+5.0 and -2.0), saldo_akhir=qty_aktual, keterangan contains 'Sistem:', 'Fisik:', 'Selisih:' as required. (4) AUDIT LOG: Verified audit entry with entity='stock_opname_bulk' and description 'Penyesuaian stok aktual 2 item: Box Kemasan (+5), Kue Kering Premium (-2)'. (5) ERROR CASES: All validation working correctly - empty items→400, negative qty_aktual→400, missing gudang_id→400, invalid qty_aktual type→400, >200 items→400, no auth→401. (6) DATA RESTORATION: Successfully restored original balances using opname-bulk (Box Kemasan 805→800, Kue Kering Premium 13→15), seed data preserved. NO ISSUES FOUND. Feature is production-ready."
   - task: "Full Backend Regression - All Modules"
     implemented: true
     working: true
@@ -154,6 +168,17 @@ backend:
         comment: "✅ REGRESSION CONFIRMED - Restore functionality verified in full regression test. 146 documents restored, data reverted correctly, login works after restore, audit log recorded."
 
 frontend:
+  - task: "Halaman Penyesuaian Stok (/stok/penyesuaian) + menu Gudang & Stok"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/stock/PenyesuaianStokPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Halaman baru: filter jenis barang (Semua/Bahan Baku/Barang Jadi), gudang, pencarian; tabel balances dengan input Stok Aktual per baris (item x gudang x batch), kolom Selisih otomatis berwarna (+hijau/-merah), baris berubah di-highlight amber; KPI (baris stok, akan disesuaikan, selisih tambah/kurang); dialog konfirmasi ringkasan + keterangan -> POST /stock/opname-bulk. Menu 'Penyesuaian Stok' ditambah di grup Gudang & Stok (navigation.js), route /stok/penyesuaian diarahkan ke halaman baru (App.js). data-testid: adj-search, adj-filter-jenis, adj-filter-gudang, adj-table, adj-input-{kode}-{batch}, simpan-penyesuaian, reset-penyesuaian, adj-confirm-dialog, adj-keterangan, adj-confirm-submit."
   - task: "Input manual Link Google Maps di form Pelanggan (opsi selain GPS)"
     implemented: true
     working: true
@@ -216,17 +241,20 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 5
+  test_sequence: 6
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Comprehensive frontend testing completed successfully"
+    - "Bulk Stock Opname Endpoint (POST /api/stock/opname-bulk)"
+    - "Halaman Penyesuaian Stok (/stok/penyesuaian) + menu Gudang & Stok"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "main"
+    message: "FITUR BARU: Penyesuaian Stok massal berdasarkan stok aktual. Backend: POST /api/stock/opname-bulk (lihat task). Test backend: login admin/torillaz123 -> GET /api/stock/balances (ambil beberapa baris bahan_baku & barang_jadi) -> POST /api/stock/opname-bulk dengan qty_aktual berbeda (naik & turun) + 1 baris qty sama (harus masuk skipped) -> verifikasi: response adjusted/skipped/results benar, GET /api/stock/balances qty ter-update ke qty_aktual, GET /api/stock/movements?tipe=opname ada movement baru dengan qty=selisih & saldo_akhir=qty_aktual, avg_price tidak berubah, audit log ada entry stock_opname_bulk. Error case: items kosong -> 400, qty_aktual negatif -> 400, item_id tanpa gudang -> 400, >200 items -> 400, tanpa auth -> 401/403. PENTING: setelah test, kembalikan qty ke nilai semula via opname-bulk lagi (jangan merusak data seed). Jangan test frontend tanpa izin."
   - agent: "main"
     message: "PEMERIKSAAN MENYELURUH SELESAI. Backend 119/119 PASSED (semua 11 modul). Frontend 12/13 flows PASSED (1 kegagalan = selector automasi form kategori, bukan bug — engine master CRUD terbukti 72/72 di backend). Minor non-kritis: warning aria-describedby DialogContent (aksesibilitas). Sisa data uji testing dibersihkan surgical via pymongo: 28 master test, 3 order test (SO-0002/0003/0005), 3 payments, 20 movements, 7 balances, 1 production order, 1 BOM test dihapus. Data asli utuh terverifikasi: SO-0001 (lunas, label Grosir), 2 gudang seed, 2 pelanggan seed, BOM Resep Roti Coklat, dashboard & stock summary valid, login OK."
   - agent: "testing"
@@ -243,6 +271,8 @@ agent_communication:
     message: "✅ FULL BACKEND REGRESSION COMPLETED (119/119 tests passed) - Comprehensive test of all backend modules completed successfully. Test file: /app/backend_test_regression.py. All 11 modules tested: Auth (5 tests), RBAC (3 tests), Master Data (72 tests covering 8 entities), Gudang & Stok (12 tests), Produksi & HPP (11 tests), Penjualan (13 tests), Keuangan (4 tests), HR (4 tests), Dashboard (1 test), Pengaturan (8 tests), Audit (4 tests). NO CRITICAL ISSUES FOUND. All endpoints responding correctly, data integrity maintained, business logic working as expected. Demo data SO-0001/INV-0001 verified (lunas, Kue Kering Premium with Grosir label). Backend is production-ready."
   - agent: "testing"
     message: "✅ COMPREHENSIVE FRONTEND TEST COMPLETED - All major flows tested successfully. Login/logout working, Dashboard displaying all KPIs and charts correctly with user name 'Agus Kimju', Master Data Barang Jadi showing 'Pilihan Harga Jual Lainnya' with Grosir 9000/Reseller 8500, Gudang & Stok pages accessible, Penjualan SO-0001 detail perfect (Kue Kering Premium 2×Rp 9.000 Grosir = Rp 18.000, all print buttons working, thermal dropdown with 4 options, PDF 80mm download successful), draft order creation working (Roti Coklat qty 1 subtotal Rp 8.000), all modules (Piutang, Keuangan, HR, Laporan, Pengaturan, Audit) loading without errors, Backup page showing Import/Restore card. Minor issues: Kategori CRUD form selector issue (not critical), draft delete button not found (draft created successfully). Console warnings about missing aria-describedby (accessibility, not functional issue). Application is production-ready with excellent functionality."
+  - agent: "testing"
+    message: "✅ BULK STOCK OPNAME ENDPOINT - ALL TESTS PASSED (30/30). Test file: /app/backend_test_opname_bulk.py. Feature fully functional and production-ready: (1) Successful bulk opname with 3 items tested (bahan_baku +5, barang_jadi -2, duplicate same qty) - response correct with adjusted=2, skipped=1, results array accurate. (2) Balances updated correctly: Box Kemasan 800→805, Kue Kering Premium 15→13, avg_price preserved (2500.0 and 25000.0). (3) Movements created with tipe='opname', qty=signed selisih (+5.0, -2.0), saldo_akhir=qty_aktual, keterangan contains 'Sistem:', 'Fisik:', 'Selisih:'. (4) Audit log verified with entity='stock_opname_bulk'. (5) All error cases validated: empty items→400, negative qty→400, missing gudang→400, invalid qty type→400, >200 items→400, no auth→401. (6) Data restoration successful - original balances restored using opname-bulk, seed data preserved. NO ISSUES FOUND. Backend task marked as working:true, needs_retesting:false."
 
   - task: "Sales order menyimpan harga_label (pilihan harga per item)"
     implemented: true

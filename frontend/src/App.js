@@ -13,6 +13,7 @@ import StockOperationPage from "@/pages/stock/StockOperationPage";
 import StokListPage from "@/pages/stock/StokListPage";
 import StokInputPage from "@/pages/stock/StokInputPage";
 import KartuStokPage from "@/pages/stock/KartuStokPage";
+import PenyesuaianStokPage from "@/pages/stock/PenyesuaianStokPage";
 import UsersPage from "@/pages/settings/UsersPage";
 import RolesPage from "@/pages/settings/RolesPage";
 import BackupPage from "@/pages/settings/BackupPage";
@@ -80,7 +81,7 @@ export default function App() {
             <Route path="/stok/input" element={<Guard module="gudang"><StokInputPage /></Guard>} />
             <Route path="/stok/penerimaan" element={<Guard module="gudang"><StockOperationPage mode="penerimaan" /></Guard>} />
             <Route path="/stok/pengeluaran" element={<Guard module="gudang"><StockOperationPage mode="pengeluaran" /></Guard>} />
-            <Route path="/stok/penyesuaian" element={<Guard module="gudang"><StockOperationPage mode="penyesuaian" /></Guard>} />
+            <Route path="/stok/penyesuaian" element={<Guard module="gudang"><PenyesuaianStokPage /></Guard>} />
             <Route path="/stok/transfer" element={<Guard module="gudang"><StockOperationPage mode="transfer" /></Guard>} />
             <Route path="/stok/opname" element={<Guard module="gudang"><StockOperationPage mode="opname" /></Guard>} />
             <Route path="/stok/kartu" element={<Guard module="gudang"><KartuStokPage /></Guard>} />

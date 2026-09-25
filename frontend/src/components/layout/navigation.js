@@ -46,6 +46,7 @@ export const NAV = [
     items: [
       { to: "/stok/input", label: "Produksi", icon: Factory, module: "gudang" },
       { to: "/stok", label: "Stok Saat Ini", icon: Boxes, module: "gudang" },
+      { to: "/stok/penyesuaian", label: "Penyesuaian Stok", icon: ClipboardCheck, module: "gudang" },
       { to: "/stok/kartu", label: "Riwayat Stok", icon: BookOpen, module: "gudang" },
     ],
   },

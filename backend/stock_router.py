@@ -259,6 +259,76 @@ async def create_movement(payload: dict = Body(...), user=Depends(require("gudan
     return serialize(mv)
 
 
+@router.post("/opname-bulk")
+async def opname_bulk(payload: dict = Body(...), user=Depends(require("gudang", "add"))):
+    """Penyesuaian stok massal berdasarkan hasil hitung fisik (stok aktual).
+
+    Payload: {keterangan?: str, items: [{item_type, item_id, gudang_id,
+              batch?, expired_date?, qty_aktual}]}
+    Untuk tiap baris: selisih = qty_aktual - qty sistem. Baris dengan selisih 0 dilewati.
+    Saldo di-set ke qty_aktual dan dicatat sebagai movement tipe "opname".
+    """
+    items = payload.get("items") or []
+    keterangan = (payload.get("keterangan") or "").strip()
+    if not items:
+        raise HTTPException(status_code=400, detail="Tidak ada item untuk disesuaikan")
+    if len(items) > 200:
+        raise HTTPException(status_code=400, detail="Maksimal 200 item per penyesuaian")
+
+    results = []
+    skipped = 0
+    for row in items:
+        item_type = row.get("item_type")
+        item_id = row.get("item_id")
+        gudang_id = row.get("gudang_id")
+        batch = row.get("batch") or "-"
+        expired_date = row.get("expired_date")
+        if not item_type or not item_id or not gudang_id:
+            raise HTTPException(status_code=400, detail="Item dan gudang wajib diisi pada setiap baris")
+        try:
+            qty_aktual = float(row.get("qty_aktual"))
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Qty aktual tidak valid")
+        if qty_aktual < 0:
+            raise HTTPException(status_code=400, detail="Qty aktual tidak boleh negatif")
+
+        item = await get_item(item_type, item_id)
+        gnama = await gudang_name(gudang_id)
+        key = await _balance_key(item_type, item_id, gudang_id, batch)
+        bal = await db.stock_balances.find_one(key)
+        cur_qty = bal["qty"] if bal else 0
+        avg = bal["avg_price"] if bal else 0
+        if not expired_date and bal:
+            expired_date = bal.get("expired_date")
+        selisih = round(qty_aktual - cur_qty, 4)
+        if selisih == 0:
+            skipped += 1
+            continue
+
+        await db.stock_balances.update_one(
+            key, {"$set": {"qty": qty_aktual, "avg_price": avg, "expired_date": expired_date,
+                           "updated_at": now_iso()}}, upsert=True)
+        no = await get_next_code(TIPE_PREFIX["opname"])
+        ket = (keterangan + " | " if keterangan else "") + \
+            f"Penyesuaian stok aktual · Sistem: {cur_qty}, Fisik: {qty_aktual}, Selisih: {selisih:+g}"
+        await record_movement(no, "opname", item, item_type, item_id, gudang_id,
+                              gnama, batch, expired_date, selisih, avg, qty_aktual, ket, user)
+        results.append({
+            "no_transaksi": no, "item_nama": item.get("nama"), "item_kode": item.get("kode"),
+            "gudang_nama": gnama, "batch": batch,
+            "qty_sistem": cur_qty, "qty_aktual": qty_aktual, "selisih": selisih,
+        })
+
+    if results:
+        detail_txt = ", ".join(f"{r['item_nama']} ({r['selisih']:+g})" for r in results[:10])
+        if len(results) > 10:
+            detail_txt += f", +{len(results) - 10} item lainnya"
+        await log_audit(user, "create", "gudang", "stock_opname_bulk",
+                        results[0]["no_transaksi"],
+                        f"Penyesuaian stok aktual {len(results)} item: {detail_txt}")
+    return {"adjusted": len(results), "skipped": skipped, "results": results}
+
+
 @router.get("/movements")
 async def list_movements(item_type: Optional[str] = None, item_id: Optional[str] = None,
                          gudang_id: Optional[str] = None, tipe: Optional[str] = None,
